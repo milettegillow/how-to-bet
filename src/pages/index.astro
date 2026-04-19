@@ -329,7 +329,7 @@ const sections = [
       {/* Figure 2: Log-wealth trajectories */}
       <figure class="mb-8">
         <div id="chart-wealth" class="sim-chart-container" role="img" aria-label="Bankroll trajectory chart showing median and percentile bands">
-          <div class="sim-chart-placeholder">Click "Run simulation" to start</div>
+          <div class="sim-chart-placeholder"><span class="text-card-red" style="font-size: 1.4rem; display: block; margin-bottom: 0.4rem;">♠</span><span style="font-variant: small-caps; font-style: italic;">Run the simulation to see the result</span></div>
         </div>
         <figcaption id="chart-wealth-caption">Figure 2 - Median bankroll trajectory, with 10th to 90th percentile band.</figcaption>
       </figure>
@@ -343,7 +343,7 @@ const sections = [
       </div>
 
       {/* Stats */}
-      <div class="readout-grid" id="sim-stats" aria-live="polite">
+      <div class="readout-grid" id="sim-stats" aria-live="polite" style="display: none;">
         <div class="readout-card">
           <div class="readout-label">Mean final wealth</div>
           <output class="readout-value block" id="stat-mean">-</output>
@@ -795,6 +795,7 @@ const sections = [
     const statMean = document.getElementById('stat-mean')!;
     const statBankrupt = document.getElementById('stat-bankrupt')!;
     const statBeat = document.getElementById('stat-beat')!;
+    const simStatsPanel = document.getElementById('sim-stats')!;
 
     // State
     let simPaths = 1000;
@@ -1104,6 +1105,17 @@ const sections = [
 
       renderWealthChart(result, config);
       renderKellyCurve();
+
+      // Reveal stats panel on first run
+      if (simStatsPanel.style.display === 'none') {
+        simStatsPanel.style.display = '';
+        if (!simReducedMotion) {
+          simStatsPanel.style.opacity = '0';
+          simStatsPanel.style.transition = 'opacity 200ms ease';
+          requestAnimationFrame(() => { simStatsPanel.style.opacity = '1'; });
+        }
+      }
+
       tweenStats(result);
 
       // Enforce minimum 300ms "Running…" display
@@ -1141,7 +1153,10 @@ const sections = [
       clearScenarioPreset();
       clearStrategyPreset();
 
-      chartWealthEl.innerHTML = '<div class="sim-chart-placeholder">Click "Run simulation" to start</div>';
+      chartWealthEl.innerHTML = '<div class="sim-chart-placeholder"><span class="text-card-red" style="font-size: 1.4rem; display: block; margin-bottom: 0.4rem;">♠</span><span style="font-variant: small-caps; font-style: italic;">Run the simulation to see the result</span></div>';
+      simStatsPanel.style.display = 'none';
+      simStatsPanel.style.opacity = '';
+      simStatsPanel.style.transition = '';
       statMedian.textContent = '-';
       statMean.textContent = '-';
       statBankrupt.textContent = '-';

@@ -477,14 +477,15 @@ input[type="range"]:disabled::-moz-range-thumb {
 
 .sim-chart-placeholder {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 250px;
-  color: rgba(26, 26, 26, 0.3);
-  font-style: italic;
+  min-height: 320px;
+  color: rgba(26, 26, 26, 0.35);
   font-size: 0.9rem;
   border: 1px dashed rgba(26, 26, 26, 0.15);
   border-radius: 4px;
+  background-color: #f8f7f4;
 }
 
 .sim-chart-notice {
