@@ -324,10 +324,10 @@ import '../styles/global.css';
             <span class="scenario-sub">p=0.3, b=3</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="private-equity">
-            <Tooltip text="Buyout investing in mature companies. Most deals (~75%) return capital plus a meaningful multiple (~2×), but the upside is capped compared to VC. High Kelly fraction is why PE funds concentrate into 10-20 deals." id="tt-pe" />
+            <Tooltip text="Buyout investing in mature companies. Historical data shows ~85% of deals return at least their invested capital, with successful deals typically achieving 2-3x MOIC (we use 1.5x profit as a middle estimate). The high win rate means Kelly recommends heavy concentration - which is exactly why PE funds really do concentrate into 10-20 deals per fund. In real life, fund structure and hold periods prevent the extreme growth rates the simulator shows. That's a pedagogical feature: Kelly's answer and operational reality diverge here." id="tt-pe" />
             <span class="scenario-icon">🏢</span>
             <span class="scenario-name">Private Equity</span>
-            <span class="scenario-sub">p=0.75, b=2</span>
+            <span class="scenario-sub">p=0.85, b=1.5</span>
           </button>
         </div>
       </div>
@@ -351,14 +351,13 @@ import '../styles/global.css';
           <div class="kelly-btn-wrap">
             <button type="button" class="kelly-btn kelly-btn-rec is-active" data-kelly-mult="1">Bet what Kelly says<span class="kelly-btn-sub">Full Kelly</span></button>
           </div>
-          <div class="kelly-btn-wrap" style="position: relative;">
-            <button type="button" class="kelly-btn" data-kelly-mult="2.1">Bet double<span class="kelly-btn-sub">Over-Kelly</span></button>
-            <Tooltip text="2× Kelly is the mathematical cliff - bet any more than that and your long-run growth rate turns negative, even with a positive edge. 2.1× puts you just over the edge so you can see what that collapse actually looks like." id="tt-over-kelly" />
+          <div class="kelly-btn-wrap">
+            <button type="button" class="kelly-btn" data-kelly-mult="2.1" style="position: relative;"><Tooltip text="2× Kelly is the mathematical cliff - bet any more than that and your long-run growth rate turns negative, even with a positive edge. 2.1× puts you just over the edge so you can see what that collapse actually looks like." id="tt-over-kelly" />Bet double<span class="kelly-btn-sub">Over-Kelly</span></button>
           </div>
         </div>
         <div class="bet-summary-grid" id="bet-summary">
           <div class="bet-summary-col">
-            <div class="bet-summary-header">Your odds of winning</div>
+            <div class="bet-summary-header">Your odds of winning <Tooltip text="Your probability of winning on a single bet. 75% means you win 3 out of 4 times on average. This is the 'p' parameter from the Kelly formula - combined with the payout, it determines whether a bet is worth taking and how much to stake." id="tt-odds" /></div>
             <div class="bet-summary-value" id="summary-odds">55.0%</div>
           </div>
           <div class="bet-summary-col">
@@ -1545,11 +1544,29 @@ import '../styles/global.css';
 
     let runLocked = false;
 
+    function setRunningState(on: boolean): void {
+      if (on) {
+        simRunBtn.style.background = '#888';
+        // Dim active scenario and strategy buttons
+        document.querySelectorAll('.scenario-btn.is-active, [data-kelly-mult].is-active').forEach(el => {
+          (el as HTMLElement).style.boxShadow = '0 0 0 1px rgba(176,141,44,0.4)';
+          (el as HTMLElement).style.filter = 'brightness(0.92)';
+        });
+      } else {
+        simRunBtn.style.background = '';
+        document.querySelectorAll('.scenario-btn.is-active, [data-kelly-mult].is-active').forEach(el => {
+          (el as HTMLElement).style.boxShadow = '';
+          (el as HTMLElement).style.filter = '';
+        });
+      }
+    }
+
     async function doRun(): Promise<void> {
       if (runLocked) return;
       runLocked = true;
       simRunBtn.textContent = 'Running…';
       simRunBtn.disabled = true;
+      setRunningState(true);
       const runStartTime = performance.now();
 
       await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
@@ -1568,6 +1585,7 @@ import '../styles/global.css';
       setTimeout(() => {
         simRunBtn.textContent = 'Run simulation';
         simRunBtn.disabled = false;
+        setRunningState(false);
         runLocked = false;
       }, reEnableDelay);
     }
@@ -1619,7 +1637,7 @@ import '../styles/global.css';
       'sports-gambler':  { bankroll: 100_000,    rounds: 1000, p: 0.54,   b: 0.909 },
       'pre-seed-vc':     { bankroll: 10_000_000, rounds: 40,   p: 0.1,    b: 20 },
       'growth-vc':       { bankroll: 100_000_000,rounds: 25,   p: 0.3,    b: 3 },
-      'private-equity':  { bankroll: 100_000_000,rounds: 15,   p: 0.75,   b: 2 },
+      'private-equity':  { bankroll: 100_000_000,rounds: 15,   p: 0.85,   b: 1.5 },
     };
 
     document.querySelectorAll<HTMLButtonElement>('[data-scenario]').forEach(btn => {

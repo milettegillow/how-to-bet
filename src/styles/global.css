@@ -685,7 +685,8 @@ input[type="range"]:disabled::-moz-range-thumb {
 }
 
 /* Tooltip ? inside scenario cards */
-.scenario-btn .tooltip-trigger {
+.scenario-btn .tooltip-trigger,
+.kelly-btn .tooltip-trigger {
   position: absolute;
   top: 0.25rem;
   right: 0.25rem;
