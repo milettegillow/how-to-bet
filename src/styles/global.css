@@ -528,6 +528,88 @@ input[type="range"]:disabled::-moz-range-thumb {
   margin-top: 0.2rem;
 }
 
+/* Kelly strategy button row */
+.kelly-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 639px) {
+  .kelly-btn-row {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.kelly-btn-wrap {
+  text-align: center;
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 10rem;
+}
+
+@media (max-width: 639px) {
+  .kelly-btn-wrap {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+.kelly-btn {
+  @apply bg-paper text-ink;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid rgba(26, 26, 26, 0.15);
+  border-radius: 4px;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.kelly-btn:hover {
+  border-color: rgba(26, 26, 26, 0.35);
+}
+
+.kelly-btn.is-active {
+  border-color: #b08d2c;
+  box-shadow: 0 0 0 1px #b08d2c;
+  font-weight: 600;
+}
+
+.kelly-btn:focus-visible {
+  outline: 2px solid #b08d2c;
+  outline-offset: 2px;
+}
+
+/* Recommended button: permanent subtle gold outline */
+.kelly-btn-rec {
+  border-color: rgba(176, 141, 44, 0.35);
+}
+
+.kelly-btn-rec.is-active {
+  border-color: #b08d2c;
+  box-shadow: 0 0 0 1px #b08d2c;
+}
+
+.kelly-rec-label {
+  font-variant: small-caps;
+  font-style: italic;
+  font-size: 0.65rem;
+  @apply text-gold;
+  margin-bottom: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kelly-btn {
+    transition: none;
+  }
+}
+
 /* Bet summary three-column display */
 .bet-summary-grid {
   display: grid;
