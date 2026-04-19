@@ -12,22 +12,32 @@
     overflow-x: hidden;
   }
 
+  body {
+    overflow-x: hidden;
+  }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
     line-height: 1.25;
   }
 
   h1 {
-    font-size: 2.5rem;
+    font-size: clamp(1.75rem, 5vw + 0.5rem, 2.5rem);
     font-weight: 700;
     letter-spacing: -0.01em;
   }
 
   h2 {
-    font-size: 1.75rem;
+    font-size: clamp(1.3rem, 3vw + 0.4rem, 1.75rem);
     font-weight: 600;
     margin-top: 3rem;
     margin-bottom: 1rem;
+  }
+
+  @media (max-width: 500px) {
+    html {
+      font-size: 17px;
+    }
   }
 
   p {
@@ -51,6 +61,7 @@
     font-variant: small-caps;
     font-size: 0.85rem;
     margin-top: 0.5rem;
+    word-wrap: break-word;
   }
 
   /* Scrollbar */
@@ -69,6 +80,19 @@
 .section-chip-img {
   flex-shrink: 0;
   object-fit: contain;
+}
+
+@media (max-width: 500px) {
+  .section-chip-img {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  /* Inline chips inside H2 on mobile */
+  h2 .section-chip-img {
+    width: 24px !important;
+    height: 24px !important;
+  }
 }
 
 /* Tooltip trigger */
@@ -133,7 +157,7 @@
   font-style: italic;
   line-height: 1.45;
   width: max-content;
-  max-width: 280px;
+  max-width: min(280px, 85vw);
   z-index: 9999;
   pointer-events: none;
   opacity: 0;
@@ -539,10 +563,11 @@ input[type="range"]:disabled::-moz-range-thumb {
   margin-bottom: 1.5rem;
 }
 
-@media (max-width: 639px) {
+@media (max-width: 500px) {
   .kelly-btn-row {
-    flex-direction: column;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
   }
 }
 
@@ -553,10 +578,9 @@ input[type="range"]:disabled::-moz-range-thumb {
   max-width: 10rem;
 }
 
-@media (max-width: 639px) {
+@media (max-width: 500px) {
   .kelly-btn-wrap {
     max-width: 100%;
-    width: 100%;
   }
 }
 
@@ -653,6 +677,8 @@ input[type="range"]:disabled::-moz-range-thumb {
   font-family: "JetBrains Mono", monospace;
   font-size: 1.2rem;
   font-weight: 500;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 /* Scenario 3x3 grid */
@@ -664,7 +690,13 @@ input[type="range"]:disabled::-moz-range-thumb {
 
 @media (max-width: 767px) {
   .scenario-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .scenario-grid {
+    gap: 0.4rem;
   }
 }
 
@@ -738,10 +770,13 @@ input[type="range"]:disabled::-moz-range-thumb {
   position: relative;
   min-height: 200px;
   margin-bottom: 0.5rem;
+  overflow: hidden;
 }
 
 .sim-chart-container svg {
   display: block;
+  max-width: 100%;
+  height: auto;
 }
 
 .sim-chart-placeholder {
@@ -755,6 +790,12 @@ input[type="range"]:disabled::-moz-range-thumb {
   border: 1px dashed rgba(26, 26, 26, 0.15);
   border-radius: 4px;
   background-color: #f8f7f4;
+}
+
+@media (max-width: 500px) {
+  .sim-chart-placeholder {
+    min-height: 220px;
+  }
 }
 
 .sim-chart-notice {
@@ -774,6 +815,48 @@ input[type="range"]:disabled::-moz-range-thumb {
   .preset-row-chip,
   .paths-btn {
     transition: none;
+  }
+}
+
+/* ─── Mobile responsive ─── */
+
+@media (max-width: 500px) {
+  /* Reduce section spacing */
+  section {
+    padding-top: 3rem !important;
+    padding-bottom: 3rem !important;
+  }
+
+  /* Bankroll buttons: allow wrapping */
+  .paths-btn-group {
+    flex-wrap: wrap;
+  }
+
+  .paths-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Scenario buttons tap targets */
+  .scenario-btn {
+    min-height: 44px;
+  }
+
+  /* Kelly strategy block breathing */
+  .kelly-strategy-block {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+
+  /* Reduce header spacing */
+  header {
+    padding-top: 3rem !important;
+    padding-bottom: 2rem !important;
+  }
+
+  /* Chart height reduction */
+  .sim-chart-container {
+    min-height: 160px;
   }
 }
 
