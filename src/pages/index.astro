@@ -31,14 +31,7 @@ const sections = [
       </div>
 
       <p class="text-body leading-relaxed">
-        A coin pays even money<span
-          class="tooltip-trigger"
-          role="button"
-          tabindex="0"
-          aria-describedby="tooltip-even-money"
-        >?<span class="tooltip-content" id="tooltip-even-money" role="tooltip"
-          >If you bet £1 and win, you get £1 profit (plus your £1 back). If you lose, you're out £1.</span
-        ></span> and lands heads 55% of the time. You have £1,000 in your account. How much do you bet?
+        A coin pays even money<Tooltip text="If you bet £1 and win, you get £1 profit (plus your £1 back). If you lose, you're out £1." id="tooltip-even-money" /> and lands heads 55% of the time. You have £1,000 in your account. How much do you bet?
       </p>
 
       {/* Slider + Button */}
@@ -272,7 +265,7 @@ const sections = [
         </div>
 
         <div class="sim-control-group">
-          <label for="sim-rounds">Number of bets</label>
+          <label for="sim-rounds">Number of bets <Tooltip text="How many bets you make in a single lifetime. A roulette session might be 500 spins; a card counter grinds out 2,000 hands; a pre-seed VC makes maybe 30-50 investments over a fund's lifetime; a PE fund might do 15 deals." id="tt-num-bets" /></label>
           <input type="range" id="sim-rounds" min="10" max="2000" step="10" value="500" />
           <div class="mt-1 text-center">
             <output for="sim-rounds" class="font-mono text-sm" id="sim-rounds-readout">500</output>
@@ -285,55 +278,55 @@ const sections = [
         <label class="block mb-2 font-medium" style="font-size: 0.9rem;">Scenarios</label>
         <div class="scenario-grid" role="group" aria-label="Scenario presets">
           <button type="button" class="scenario-btn" data-scenario="fair-coin">
-            <Tooltip text="A fair coin paying even money. Zero edge. Kelly says don't play - you won't go broke any faster than you would at a casino, but you won't get anywhere either." position="below" id="tt-fair-coin" />
+            <Tooltip text="A fair coin paying even money. Zero edge. Kelly says don't play - you won't go broke any faster than you would at a casino, but you won't get anywhere either." id="tt-fair-coin" />
             <span class="scenario-icon">⚪</span>
             <span class="scenario-name">Fair Coin</span>
             <span class="scenario-sub">p=0.50, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="eu-roulette">
-            <Tooltip text="European roulette, betting red or black. The single green zero gives the house a 2.7% edge. Kelly returns a negative fraction - mathematically, the correct bet is not to play." position="below" id="tt-eu-roulette" />
+            <Tooltip text="European roulette, betting red or black. The single green zero gives the house a 2.7% edge. Kelly returns a negative fraction - mathematically, the correct bet is not to play." id="tt-eu-roulette" />
             <span class="scenario-icon">🎡</span>
             <span class="scenario-name">EU Roulette</span>
             <span class="scenario-sub">p=0.4865, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="us-roulette">
-            <Tooltip text="American roulette, betting red or black. Two green zeros (0 and 00) give the house a 5.3% edge - nearly double European roulette, for the same game." position="below" id="tt-us-roulette" />
+            <Tooltip text="American roulette, betting red or black. Two green zeros (0 and 00) give the house a 5.3% edge - nearly double European roulette, for the same game." id="tt-us-roulette" />
             <span class="scenario-icon">🎰</span>
             <span class="scenario-name">US Roulette</span>
             <span class="scenario-sub">p=0.4737, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="biased-coin">
-            <Tooltip text="The coin from the opening question. 55% win rate, paying even money. A small positive edge. Kelly: bet 10% of your bankroll each round." position="below" id="tt-biased-coin" />
+            <Tooltip text="The coin from the opening question. 55% win rate, paying even money. A small positive edge. Kelly: bet 10% of your bankroll each round." id="tt-biased-coin" />
             <span class="scenario-icon">🪙</span>
             <span class="scenario-name">Biased Coin</span>
             <span class="scenario-sub">p=0.55, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="card-counter">
-            <Tooltip text="A skilled blackjack card counter's edge when the count is favourable. Thin positive edge, tiny bets, long grind. This is what actual professional gambling looks like." position="below" id="tt-card-counter" />
+            <Tooltip text="A skilled blackjack card counter's edge when the count is favourable. Thin positive edge, tiny bets, long grind. This is what actual professional gambling looks like." id="tt-card-counter" />
             <span class="scenario-icon">🃏</span>
             <span class="scenario-name">Card Counter</span>
             <span class="scenario-sub">p=0.51, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="sports-gambler">
-            <Tooltip text="A winning sports bettor. Breaking even requires a 52.4% win rate because of the bookmaker's cut; sharps sustain 53-55%. Modelled here as a 54% win rate at -110 odds." position="below" id="tt-sports" />
+            <Tooltip text="A winning sports bettor. Breaking even requires a 52.4% win rate because of the bookmaker's cut; sharps sustain 53-55%. Modelled here as a 54% win rate at -110 odds." id="tt-sports" />
             <span class="scenario-icon">🏈</span>
             <span class="scenario-name">Sharp Sports</span>
             <span class="scenario-sub">p=0.54, b=0.909</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="pre-seed-vc">
-            <Tooltip text="Writing £250k cheques into early-stage startups. Roughly 10% of investments return 20× or more; the rest go to zero. Large positive edge, enormous variance - why VCs diversify across 30+ portfolio companies." position="below" id="tt-pre-seed" />
+            <Tooltip text="Writing £250k cheques into early-stage startups. Roughly 10% of investments return 20× or more; the rest go to zero. Large positive edge, enormous variance - why VCs diversify across 30+ portfolio companies." id="tt-pre-seed" />
             <span class="scenario-icon">🚀</span>
             <span class="scenario-name">Pre-seed VC</span>
             <span class="scenario-sub">p=0.1, b=20</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="growth-vc">
-            <Tooltip text="Later-stage venture investing. Companies are de-risked, valuations are higher. Lower hit rate than pre-seed (~30%), smaller multiples (~3×). Different shape of power law, same basic maths." position="below" id="tt-growth-vc" />
+            <Tooltip text="Later-stage venture investing. Companies are de-risked, valuations are higher. Lower hit rate than pre-seed (~30%), smaller multiples (~3×). Different shape of power law, same basic maths." id="tt-growth-vc" />
             <span class="scenario-icon">📈</span>
             <span class="scenario-name">Growth VC</span>
             <span class="scenario-sub">p=0.3, b=3</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="private-equity">
-            <Tooltip text="Buyout investing in mature companies. Most deals (~75%) return capital plus a meaningful multiple (~2×), but the upside is capped compared to VC. High Kelly fraction is why PE funds concentrate into 10-20 deals." position="below" id="tt-pe" />
+            <Tooltip text="Buyout investing in mature companies. Most deals (~75%) return capital plus a meaningful multiple (~2×), but the upside is capped compared to VC. High Kelly fraction is why PE funds concentrate into 10-20 deals." id="tt-pe" />
             <span class="scenario-icon">🏢</span>
             <span class="scenario-name">Private Equity</span>
             <span class="scenario-sub">p=0.75, b=2</span>
@@ -344,14 +337,13 @@ const sections = [
       {/* Figure 1: Kelly curve (analytical) */}
       <figure class="mt-10 mb-2">
         <div id="chart-kelly-curve" class="sim-chart-container" role="img" aria-label="Theoretical growth rate by Kelly multiplier"></div>
-        <div id="kelly-amounts-row" class="font-mono text-center" style="font-size: 0.65rem; color: rgba(26,26,26,0.4); margin-top: -0.25rem; margin-bottom: 0.5rem;"></div>
         <figcaption>Figure 1 - Theoretical growth rate by Kelly multiplier. Your current choice is marked. Above 2x, growth goes negative: even a positive-edge bet loses money on average.</figcaption>
       </figure>
 
       {/* Kelly strategies block */}
       <div class="kelly-strategy-block my-10 py-8" id="kelly-strategy-block">
         <div class="text-center mb-4 font-serif" style="font-size: 1.05rem; color: rgba(26,26,26,0.7);" id="kelly-says"></div>
-        <div class="flex flex-wrap justify-center gap-3 mb-4" role="group" aria-label="Kelly strategy multipliers">
+        <div class="flex flex-wrap justify-center gap-3 mb-5" role="group" aria-label="Kelly strategy multipliers">
           <div class="text-center">
             <button type="button" class="paths-btn" data-kelly-mult="0.25" style="min-width: 3.5rem;">0.25×</button>
             <div class="strategy-label">Quarter</div>
@@ -364,22 +356,30 @@ const sections = [
             <button type="button" class="paths-btn is-active" data-kelly-mult="1" style="min-width: 3.5rem;">1×</button>
             <div class="strategy-label">Full Kelly</div>
           </div>
-          <div class="text-center">
-            <button type="button" class="paths-btn" data-kelly-mult="1.5" style="min-width: 3.5rem;">1.5×</button>
-            <div class="strategy-label">1.5× Kelly</div>
-          </div>
           <div class="text-center" style="position: relative;">
-            <Tooltip text="2× Kelly is the mathematical cliff - bet any more than that and your long-run growth rate turns negative, even with a positive edge. 2.1× puts you just over the edge so you can see what that collapse actually looks like." id="tt-over-kelly" />
             <button type="button" class="paths-btn" data-kelly-mult="2.1" style="min-width: 3.5rem;">2.1×</button>
-            <div class="strategy-label">Over-Kelly</div>
+            <div class="strategy-label">Over-Kelly <Tooltip text="2× Kelly is the mathematical cliff - bet any more than that and your long-run growth rate turns negative, even with a positive edge. 2.1× puts you just over the edge so you can see what that collapse actually looks like." id="tt-over-kelly" /></div>
           </div>
         </div>
-        <div class="text-center font-mono font-bold text-card-red" style="font-size: 1.2rem;" id="you-bet"></div>
+        <div class="bet-summary-grid" id="bet-summary">
+          <div class="bet-summary-col">
+            <div class="bet-summary-header">Your odds of winning</div>
+            <div class="bet-summary-value" id="summary-odds">55.0%</div>
+          </div>
+          <div class="bet-summary-col">
+            <div class="bet-summary-header">If you win, you get <Tooltip text="Your original stake plus your winnings. If you bet £100 at even-money odds and win, you get £200 back: your £100 stake plus £100 profit. If you bet £100 at 20:1 odds and win, you get £2,100 back: your £100 stake plus £2,000 profit." id="tt-win-payout" /></div>
+            <div class="bet-summary-value" id="summary-payout">£200</div>
+          </div>
+          <div class="bet-summary-col">
+            <div class="bet-summary-header">Your bet</div>
+            <div class="bet-summary-value text-card-red font-bold" id="summary-bet">£100</div>
+          </div>
+        </div>
       </div>
 
       {/* Run button + Reset */}
-      <div class="mt-8 mb-2">
-        <button type="button" id="sim-run" class="btn-primary w-full" style="font-size: 0.95rem; padding: 0.6rem 1rem;">Run simulation</button>
+      <div class="mt-8 mb-1 text-center">
+        <button type="button" id="sim-run" class="btn-primary" style="font-size: 0.95rem; padding: 0.6rem 2.5rem;">Run simulation</button>
       </div>
       <div class="text-center mb-8">
         <a href="#" id="sim-reset" class="text-sm text-ink/40 hover:text-ink/60" style="text-decoration: none; font-style: italic;">Reset</a>
@@ -462,30 +462,140 @@ const sections = [
       slider.setAttribute('aria-valuetext', `£${val}`);
     });
 
-    // Tooltip tap-to-toggle on touch devices
+    // ─── Portal tooltip system ───
+    const tooltipEl = document.createElement('div');
+    tooltipEl.className = 'tooltip-portal';
+    tooltipEl.setAttribute('role', 'tooltip');
+    const tooltipArrow = document.createElement('div');
+    tooltipArrow.className = 'tooltip-portal-arrow';
+    tooltipEl.appendChild(tooltipArrow);
+    const tooltipBody = document.createElement('span');
+    tooltipEl.appendChild(tooltipBody);
+    document.body.appendChild(tooltipEl);
+
+    let activeTrigger: Element | null = null;
+
+    function positionTooltip(trigger: Element): void {
+      const rect = trigger.getBoundingClientRect();
+      const gap = 8;
+
+      tooltipEl.style.visibility = 'hidden';
+      tooltipEl.style.display = 'block';
+      tooltipEl.classList.add('is-visible');
+      const ttRect = tooltipEl.getBoundingClientRect();
+
+      // Default: above
+      let top = rect.top - ttRect.height - gap;
+      let placeBelow = false;
+
+      if (top < 4) {
+        // Not enough room above, flip below
+        top = rect.bottom + gap;
+        placeBelow = true;
+      }
+
+      // Centre horizontally on the trigger
+      let left = rect.left + rect.width / 2 - ttRect.width / 2;
+
+      // Clamp to viewport edges
+      const margin = 8;
+      if (left < margin) left = margin;
+      if (left + ttRect.width > window.innerWidth - margin) {
+        left = window.innerWidth - margin - ttRect.width;
+      }
+
+      tooltipEl.style.top = top + 'px';
+      tooltipEl.style.left = left + 'px';
+      tooltipEl.style.visibility = '';
+
+      // Position arrow
+      tooltipArrow.className = 'tooltip-portal-arrow ' + (placeBelow ? 'arrow-up' : 'arrow-down');
+      const arrowLeft = rect.left + rect.width / 2 - left;
+      tooltipArrow.style.left = arrowLeft + 'px';
+      tooltipArrow.style.transform = 'translateX(-50%)';
+    }
+
+    function showTooltip(trigger: Element): void {
+      const text = trigger.getAttribute('data-tooltip');
+      if (!text) return;
+
+      // Dismiss any open tooltip
+      hideTooltip();
+
+      const id = trigger.getAttribute('data-tooltip-id') || '';
+      tooltipEl.id = id;
+      tooltipBody.textContent = text;
+      activeTrigger = trigger;
+
+      positionTooltip(trigger);
+    }
+
+    function hideTooltip(): void {
+      tooltipEl.classList.remove('is-visible');
+      tooltipEl.style.display = 'none';
+      activeTrigger = null;
+    }
+
+    // Hover: show on mouseenter, hide on mouseleave
+    document.addEventListener('mouseenter', (e) => {
+      const trigger = (e.target as Element).closest?.('.tooltip-trigger');
+      if (trigger) showTooltip(trigger);
+    }, true);
+
+    document.addEventListener('mouseleave', (e) => {
+      const trigger = (e.target as Element).closest?.('.tooltip-trigger');
+      if (trigger && trigger === activeTrigger) hideTooltip();
+    }, true);
+
+    // Click / tap: toggle
     document.querySelectorAll('.tooltip-trigger').forEach((trigger) => {
       trigger.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        trigger.classList.toggle('is-active');
+        if (activeTrigger === trigger) {
+          hideTooltip();
+        } else {
+          showTooltip(trigger);
+        }
       });
 
       trigger.addEventListener('keydown', (e) => {
-        if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') {
+        const key = (e as KeyboardEvent).key;
+        if (key === 'Enter' || key === ' ') {
           e.preventDefault();
-          trigger.classList.toggle('is-active');
+          e.stopPropagation();
+          if (activeTrigger === trigger) {
+            hideTooltip();
+          } else {
+            showTooltip(trigger);
+          }
         }
       });
     });
 
-    // Close tooltips when clicking elsewhere
+    // Dismiss on click outside
     document.addEventListener('click', (e) => {
-      if (!(e.target as Element).closest('.tooltip-trigger')) {
-        document.querySelectorAll('.tooltip-trigger.is-active').forEach((t) => {
-          t.classList.remove('is-active');
-        });
+      if (activeTrigger && !(e.target as Element).closest('.tooltip-trigger')) {
+        hideTooltip();
       }
     });
+
+    // Dismiss on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activeTrigger) hideTooltip();
+    });
+
+    // Reposition on scroll/resize
+    let repositionFrame = 0;
+    function handleReposition(): void {
+      if (repositionFrame) return;
+      repositionFrame = requestAnimationFrame(() => {
+        repositionFrame = 0;
+        if (activeTrigger) positionTooltip(activeTrigger);
+      });
+    }
+    window.addEventListener('scroll', handleReposition, { passive: true });
+    window.addEventListener('resize', handleReposition, { passive: true });
 
     // Lock in bet
     lockBtn.addEventListener('click', () => {
@@ -833,10 +943,11 @@ const sections = [
     const chartWealthEl = document.getElementById('chart-wealth')!;
     const chartKellyEl = document.getElementById('chart-kelly-curve')!;
     const chartWealthCaption = document.getElementById('chart-wealth-caption')!;
-    const kellyAmountsRow = document.getElementById('kelly-amounts-row')!;
 
     const kellySaysEl = document.getElementById('kelly-says')!;
-    const youBetEl = document.getElementById('you-bet')!;
+    const summaryOdds = document.getElementById('summary-odds')!;
+    const summaryPayout = document.getElementById('summary-payout')!;
+    const summaryBet = document.getElementById('summary-bet')!;
 
     const statMedian = document.getElementById('stat-median')!;
     const statMean = document.getElementById('stat-mean')!;
@@ -879,43 +990,35 @@ const sections = [
 
     function updateKellyDisplay(): void {
       const kf = getCurrentKelly();
+      const p = parseInt(simPSlider.value) / 1000;
+      const b = sliderToSimB(parseInt(simBSlider.value));
 
       if (kf <= 0) {
-        kellySaysEl.textContent = "Kelly says: don't bet.";
-        youBetEl.innerHTML = formatCurrency(0) + ' (0.0% of bankroll)';
-        // Grey out strategy buttons
+        kellySaysEl.textContent = "Kelly suggests not betting on this scenario.";
+        summaryOdds.textContent = (p * 100).toFixed(1) + '%';
+        summaryPayout.innerHTML = formatCurrency(0);
+        summaryBet.innerHTML = formatCurrency(0);
         document.querySelectorAll<HTMLButtonElement>('[data-kelly-mult]').forEach(btn => {
           btn.style.opacity = '0.4';
         });
+        document.getElementById('bet-summary')!.style.opacity = '0.4';
       } else {
         const kellyBet = kf * simBankroll;
         const kellyPct = (kf * 100).toFixed(1);
-        kellySaysEl.innerHTML = `Kelly says: bet ${formatCurrency(Math.round(kellyBet))} (${kellyPct}% of bankroll)`;
-        // Re-enable
+        kellySaysEl.innerHTML = `Kelly suggests betting ${kellyPct}% of bankroll, i.e. ${formatCurrency(Math.round(kellyBet))}.`;
         document.querySelectorAll<HTMLButtonElement>('[data-kelly-mult]').forEach(btn => {
           btn.style.opacity = '';
         });
+        document.getElementById('bet-summary')!.style.opacity = '';
 
         const actualFrac = Math.abs(kf) * simKellyMult;
         const actualBet = actualFrac * simBankroll;
-        const actualPct = (actualFrac * 100).toFixed(1);
-        youBetEl.innerHTML = `You bet: ${formatCurrency(Math.round(actualBet))} (${actualPct}% of bankroll)`;
+        const winPayout = actualBet * (1 + b);
+
+        summaryOdds.textContent = (p * 100).toFixed(1) + '%';
+        summaryPayout.innerHTML = formatCurrency(Math.round(winPayout));
+        summaryBet.innerHTML = formatCurrency(Math.round(actualBet));
       }
-
-      // Update £ amounts row under Kelly curve
-      updateKellyAmountsRow();
-    }
-
-    function updateKellyAmountsRow(): void {
-      const kf = Math.abs(getCurrentKelly());
-      const mults = [0, 0.5, 1, 1.5, 2, 2.5];
-      const labels = mults.map(m => {
-        const amt = kf * m * simBankroll;
-        return formatCurrency(Math.round(amt));
-      });
-      kellyAmountsRow.innerHTML = labels.map(l =>
-        `<span style="display:inline-block; width:16.6%; text-align:center;">${l}</span>`
-      ).join('');
     }
 
     // ─── Preset row state ───
@@ -1099,15 +1202,28 @@ const sections = [
         }),
       ] : [];
 
+      // £ amount labels for x-axis ticks
+      const tickMults = [0, 0.5, 1, 1.5, 2, 2.5];
+      const amountLabels = tickMults.map(m => ({
+        mult: m,
+        label: formatCurrency(Math.round(kelly * m * simBankroll)),
+      }));
+
       const chart = Plot.plot({
         width,
         height: 240,
+        marginBottom: 52,
         style: {
           fontFamily: '"EB Garamond", Georgia, serif',
           fontSize: '13px',
           background: 'transparent',
         },
-        x: { label: "Kelly multiplier", domain: [0, 2.5] },
+        x: {
+          label: "Kelly multiplier",
+          domain: [0, 2.5],
+          ticks: tickMults,
+          tickFormat: (d: number) => d.toFixed(1) + '×',
+        },
         y: { label: "↑ Growth rate (per round)", grid: true },
         marks: [
           Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
@@ -1117,13 +1233,23 @@ const sections = [
           Plot.lineY(data, { x: "mult", y: "growth", stroke: "#1a1a1a", strokeWidth: 2, curve: "natural" }),
           Plot.ruleX([simKellyMult], { stroke: "#a8252c", strokeWidth: 1.5, strokeDasharray: "4,3" }),
           ...peakMarks,
+          // £ amounts as secondary x-axis labels
+          Plot.text(amountLabels, {
+            x: "mult",
+            y: null,
+            text: "label",
+            frameAnchor: "bottom",
+            dy: 38,
+            fontSize: 10,
+            fontWeight: "600",
+            fontFamily: '"JetBrains Mono", monospace',
+            fill: "#1a1a1a",
+          }),
         ],
       });
 
       chartKellyEl.innerHTML = '';
       chartKellyEl.appendChild(chart);
-
-      updateKellyAmountsRow();
     }
 
     // ─── Stats with animated tweening ───

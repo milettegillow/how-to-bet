@@ -71,86 +71,98 @@
   object-fit: contain;
 }
 
-/* Tooltip */
+/* Tooltip trigger */
 .tooltip-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  background: rgba(176, 141, 44, 0.1);
+  border: 1.5px solid #b08d2c;
   @apply text-gold;
+  border-radius: 50%;
   cursor: help;
-  position: relative;
-  font-size: 0.75em;
-  vertical-align: super;
-  font-weight: 600;
+  font-size: 0.6rem;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  margin-left: 3px;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+  flex-shrink: 0;
 }
 
-.tooltip-content {
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  @apply bg-ink text-paper;
-  padding: 0.6rem 0.8rem;
-  border-radius: 3px;
-  font-size: 0.8rem;
-  font-style: italic;
-  line-height: 1.45;
-  width: max-content;
-  max-width: 280px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  z-index: 10;
+.tooltip-trigger:hover {
+  background: rgba(176, 141, 44, 0.25);
+  transform: scale(1.05);
 }
 
-.tooltip-content::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-top-color: #1a1a1a;
+.tooltip-trigger:focus-visible {
+  background: rgba(176, 141, 44, 0.25);
+  outline: 2px solid #b08d2c;
+  outline-offset: 2px;
 }
 
-/* Below variant */
-.tooltip-content-below {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  @apply bg-ink text-paper;
-  padding: 0.6rem 0.8rem;
-  border-radius: 3px;
-  font-size: 0.8rem;
-  font-style: italic;
-  line-height: 1.45;
-  width: max-content;
-  max-width: 280px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease;
-  z-index: 10;
-}
-
-.tooltip-content-below::after {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 5px solid transparent;
-  border-bottom-color: #1a1a1a;
-}
-
-.tooltip-trigger:hover .tooltip-content,
-.tooltip-trigger:hover .tooltip-content-below,
-.tooltip-trigger.is-active .tooltip-content,
-.tooltip-trigger.is-active .tooltip-content-below {
-  opacity: 1;
-  pointer-events: auto;
+@media (max-width: 639px) {
+  .tooltip-trigger {
+    width: 22px;
+    height: 22px;
+    font-size: 0.65rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tooltip-content,
-  .tooltip-content-below {
+  .tooltip-trigger {
+    transition: none;
+  }
+  .tooltip-trigger:hover {
+    transform: none;
+  }
+}
+
+/* Portal tooltip (positioned by JS at body level) */
+.tooltip-portal {
+  position: fixed;
+  @apply bg-ink text-paper;
+  padding: 0.6rem 0.8rem;
+  border-radius: 3px;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.45;
+  width: max-content;
+  max-width: 280px;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.tooltip-portal.is-visible {
+  opacity: 1;
+}
+
+.tooltip-portal-arrow {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+}
+
+/* Arrow below tooltip (tooltip is above trigger) */
+.tooltip-portal-arrow.arrow-down {
+  top: 100%;
+  border-top-color: #1a1a1a;
+}
+
+/* Arrow above tooltip (tooltip is below trigger) */
+.tooltip-portal-arrow.arrow-up {
+  bottom: 100%;
+  border-bottom-color: #1a1a1a;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip-portal {
     transition: none;
   }
 }
@@ -516,6 +528,43 @@ input[type="range"]:disabled::-moz-range-thumb {
   margin-top: 0.2rem;
 }
 
+/* Bet summary three-column display */
+.bet-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin: 1.25rem 0;
+}
+
+@media (max-width: 639px) {
+  .bet-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.bet-summary-col {
+  text-align: center;
+}
+
+.bet-summary-header {
+  font-variant: small-caps;
+  font-style: italic;
+  font-size: 0.75rem;
+  color: rgba(26, 26, 26, 0.5);
+  margin-bottom: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+}
+
+.bet-summary-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
 /* Scenario 3x3 grid */
 .scenario-grid {
   display: grid;
@@ -548,10 +597,13 @@ input[type="range"]:disabled::-moz-range-thumb {
 /* Tooltip ? inside scenario cards */
 .scenario-btn .tooltip-trigger {
   position: absolute;
-  top: 0.3rem;
-  right: 0.35rem;
-  font-size: 0.6rem;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 16px;
+  height: 16px;
+  font-size: 0.55rem;
   z-index: 2;
+  margin-left: 0;
 }
 
 .scenario-btn:hover {
