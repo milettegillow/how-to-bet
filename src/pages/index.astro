@@ -23,9 +23,9 @@ const sections = [
     {/* ─── Section 1: The opening question ─── */}
     <section id="opening" class="max-w-prose mx-auto pb-20">
       <div class="flex items-start gap-4 mb-8">
-        <div class="section-chip hidden sm:inline-flex mt-1">1</div>
+        <img src="/chip-1.png" alt="" width="48" height="48" class="section-chip-img hidden sm:block" />
         <h2 class="mt-0" style="margin-top: 0;">
-          <span class="section-chip inline-flex sm:hidden mr-2 align-middle" style="width: 28px; height: 28px; font-size: 0.85rem;">1</span>
+          <img src="/chip-1.png" alt="" width="32" height="32" class="section-chip-img inline sm:hidden mr-2 align-middle" />
           The opening question
         </h2>
       </div>
@@ -88,9 +88,9 @@ const sections = [
     {/* ─── Section 2: Building intuition - edge ─── */}
     <section id="edge" class="max-w-prose mx-auto py-20 border-t border-ink/10">
       <div class="flex items-start gap-4 mb-8">
-        <div class="section-chip hidden sm:inline-flex mt-1">2</div>
+        <img src="/chip-2.png" alt="" width="48" height="48" class="section-chip-img hidden sm:block" />
         <h2 class="mt-0" style="margin-top: 0;">
-          <span class="section-chip inline-flex sm:hidden mr-2 align-middle" style="width: 28px; height: 28px; font-size: 0.85rem;">2</span>
+          <img src="/chip-2.png" alt="" width="32" height="32" class="section-chip-img inline sm:hidden mr-2 align-middle" />
           Building intuition: edge
         </h2>
       </div>
@@ -234,12 +234,9 @@ const sections = [
     {sections.map((s) => (
       <section id={s.id} class="max-w-prose mx-auto py-20 border-t border-ink/10">
         <div class="flex items-start gap-4 mb-8">
-          <div class="section-chip hidden sm:inline-flex mt-1">{s.num}</div>
+          <img src={`/chip-${s.num}.png`} alt="" width="48" height="48" loading="lazy" class="section-chip-img hidden sm:block" />
           <h2 class="mt-0" style="margin-top: 0;">
-            <span
-              class="section-chip inline-flex sm:hidden mr-2 align-middle"
-              style="width: 28px; height: 28px; font-size: 0.85rem;"
-            >{s.num}</span>
+            <img src={`/chip-${s.num}.png`} alt="" width="32" height="32" loading="lazy" class="section-chip-img inline sm:hidden mr-2 align-middle" />
             {s.title}
           </h2>
         </div>
@@ -438,7 +435,7 @@ const sections = [
         kellyCaption.innerHTML = 'Kelly recommends not betting on negative-edge games';
       } else {
         kellyOutput.textContent = (kelly * 100).toFixed(2) + '%';
-        kellyCaption.innerHTML = 'the Kelly fraction, <em>f</em><sup style="font-size:0.65em">*</sup>';
+        kellyCaption.innerHTML = 'the Kelly fraction, <em>f</em> <sup style="font-size:0.65em">*</sup>';
       }
 
       // Suggested bet

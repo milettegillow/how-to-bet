@@ -64,19 +64,10 @@
   }
 }
 
-/* Section chip numbers */
-.section-chip {
-  @apply bg-card-red text-paper;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "EB Garamond", Georgia, serif;
-  font-size: 1rem;
-  font-weight: 700;
+/* Section chip images */
+.section-chip-img {
   flex-shrink: 0;
+  object-fit: contain;
 }
 
 /* Tooltip */
