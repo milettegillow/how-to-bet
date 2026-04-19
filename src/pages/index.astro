@@ -756,6 +756,7 @@ const sections = [
     import * as Plot from "@observablehq/plot";
     import { runSimulation, kellyFraction, growthRate } from "../lib/kelly";
     import type { SimConfig, SimResult } from "../lib/kelly";
+    import { formatCurrency } from "../lib/format";
 
     // Log-scale helpers
     function sliderToBankroll(v: number): number {
@@ -1049,8 +1050,8 @@ const sections = [
       };
 
       if (simReducedMotion || !hasRunOnce) {
-        statMedian.textContent = gbpSim.format(targets.median);
-        statMean.textContent = gbpSim.format(targets.mean);
+        statMedian.innerHTML = formatCurrency(targets.median);
+        statMean.innerHTML = formatCurrency(targets.mean);
         statBankrupt.textContent = targets.bankrupt.toFixed(1) + '%';
         statBeat.textContent = targets.beat.toFixed(1) + '%';
         prevStats = targets;
@@ -1073,8 +1074,8 @@ const sections = [
         const curBankrupt = starts.bankrupt + (targets.bankrupt - starts.bankrupt) * ease;
         const curBeat = starts.beat + (targets.beat - starts.beat) * ease;
 
-        statMedian.textContent = gbpSim.format(Math.round(curMedian));
-        statMean.textContent = gbpSim.format(Math.round(curMean));
+        statMedian.innerHTML = formatCurrency(Math.round(curMedian));
+        statMean.innerHTML = formatCurrency(Math.round(curMean));
         statBankrupt.textContent = curBankrupt.toFixed(1) + '%';
         statBeat.textContent = curBeat.toFixed(1) + '%';
 
