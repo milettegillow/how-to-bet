@@ -43,7 +43,7 @@
     opacity: 0.8;
   }
 
-  /* Figure captions — small-caps italic */
+  /* Figure captions - small-caps italic */
   figcaption {
     @apply text-ink/60;
     font-style: italic;
@@ -205,6 +205,171 @@ input[type="range"]:disabled::-moz-range-thumb {
 
 .btn-primary:hover {
   opacity: 0.9;
+}
+
+/* Formula blocks */
+.formula {
+  text-align: center;
+  font-size: 1.15em;
+  font-style: italic;
+  margin: 1.8em 0;
+  padding: 0.6em 0;
+  font-family: "EB Garamond", Georgia, serif;
+}
+
+.formula strong {
+  font-style: italic;
+}
+
+/* Readout grid */
+.readout-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+@media (max-width: 639px) {
+  .readout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.readout-card {
+  padding: 1rem 1.2rem;
+  border: 1px solid rgba(26, 26, 26, 0.1);
+  border-radius: 4px;
+}
+
+.readout-label {
+  font-variant: small-caps;
+  font-style: italic;
+  font-size: 0.85rem;
+  color: rgba(26, 26, 26, 0.55);
+  margin-bottom: 0.3rem;
+}
+
+.readout-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.readout-caption {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: rgba(26, 26, 26, 0.45);
+  margin-top: 0.3rem;
+  line-height: 1.35;
+}
+
+/* Preset chips */
+.preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+@media (max-width: 639px) {
+  .preset-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 0.75rem;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+.preset-chip {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  @apply bg-card-red text-paper;
+  font-family: "EB Garamond", Georgia, serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border: 3px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.25;
+  padding: 0.4rem;
+  position: relative;
+  flex-shrink: 0;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.preset-chip:hover {
+  opacity: 0.92;
+}
+
+.preset-chip.is-active {
+  border-color: #b08d2c;
+  box-shadow: 0 0 0 2px #b08d2c;
+  font-weight: 700;
+}
+
+.preset-chip:focus-visible {
+  outline: 2px solid #b08d2c;
+  outline-offset: 3px;
+}
+
+/* Chip tooltip - reusable pattern */
+.chip-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  @apply bg-ink text-paper;
+  padding: 0.6rem 0.8rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1.45;
+  width: max-content;
+  max-width: 280px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 50;
+  text-align: left;
+}
+
+.chip-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1a1a1a;
+}
+
+.preset-chip:hover .chip-tooltip,
+.preset-chip:focus-visible .chip-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Touch: tap-to-toggle via JS */
+.preset-chip.tooltip-active .chip-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preset-chip {
+    transition: none;
+  }
+
+  .chip-tooltip {
+    transition: none;
+  }
 }
 
 /* Card suit bullets */

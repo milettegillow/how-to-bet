@@ -3,7 +3,6 @@ import Base from '../layouts/Base.astro';
 import '../styles/global.css';
 
 const sections = [
-  { num: 2, id: 'edge', title: 'Building intuition: edge' },
   { num: 3, id: 'simulator', title: 'The main event: the simulator' },
   { num: 4, id: 'kelly', title: 'Full Kelly vs half Kelly' },
   { num: 5, id: 'ruin', title: 'The warning: Gambler\'s Ruin' },
@@ -86,7 +85,152 @@ const sections = [
       </div>
     </section>
 
-    {/* ─── Stub sections 2–6 ─── */}
+    {/* ─── Section 2: Building intuition - edge ─── */}
+    <section id="edge" class="max-w-prose mx-auto py-20 border-t border-ink/10">
+      <div class="flex items-start gap-4 mb-8">
+        <div class="section-chip hidden sm:inline-flex mt-1">2</div>
+        <h2 class="mt-0" style="margin-top: 0;">
+          <span class="section-chip inline-flex sm:hidden mr-2 align-middle" style="width: 28px; height: 28px; font-size: 0.85rem;">2</span>
+          Building intuition: edge
+        </h2>
+      </div>
+
+      {/* ─── Part 1: Prose ─── */}
+      <p>Every bet has two numbers: the probability you win, and how much you win if you do. Neither alone tells you whether the bet is worth taking. A 20% chance to win at 10:1 payout is a great bet; a 20% chance at 2:1 is a terrible one. We need a single number that combines both.</p>
+
+      <p>That number is <strong>edge</strong>: how much money you expect to make, on average, for every £1 you stake.</p>
+
+      <p>For a bet with win probability <em>p</em>, loss probability <em>q</em>&nbsp;=&nbsp;1&nbsp;−&nbsp;<em>p</em>, and net payout <em>b</em>&nbsp;:&nbsp;1 (meaning: stake £1, win £<em>b</em> profit if successful, lose your £1 if not), edge is:</p>
+
+      <div class="formula">
+        <strong>edge</strong> = <em>bp</em> − <em>q</em>
+      </div>
+
+      <p>Positive edge means you expect to make money. Zero edge means you break even on average. Negative edge means you expect to lose (which is why casinos exist).</p>
+
+      <p>The <a href="https://en.wikipedia.org/wiki/Kelly_criterion" target="_blank" rel="noopener noreferrer">Kelly Criterion</a> takes edge and tells you what fraction of your bankroll to bet:</p>
+
+      <div class="formula">
+        <em>f</em> <sup>*</sup> = edge / <em>b</em>
+      </div>
+
+      <p>The formula captures the full picture: bet more when edge is large, and bet less when the payout <em>b</em> is large. A bigger <em>b</em> means rarer wins, so you can go through long losing runs before the payoff arrives. Kelly shrinks your bet to keep you solvent through those runs.</p>
+
+      <p>Try it below. Drag the probability and payout sliders, and watch edge, fair odds, and the Kelly fraction update. Then click one of the reference chips below the calculator: each applies the parameters of a real-world bet so you can see how edge behaves across orders of magnitude.</p>
+
+      {/* ─── Part 2: Edge calculator ─── */}
+      <div class="mt-12 mb-8" id="edge-calculator">
+        <div class="mb-8">
+          <label for="p-slider" class="block mb-2 font-medium">Win probability (<em>p</em>)</label>
+          <input
+            type="range"
+            id="p-slider"
+            min="1"
+            max="999"
+            step="1"
+            value="550"
+            aria-valuemin="0.1"
+            aria-valuemax="99.9"
+            aria-valuenow="55.0"
+            aria-valuetext="55.0%"
+          />
+          <div class="mt-2 text-center">
+            <output for="p-slider" class="font-mono text-lg" id="p-readout">55.0%</output>
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <label for="b-slider" class="block mb-2 font-medium">Payout (<em>b</em>&thinsp;:&thinsp;1)</label>
+          <input
+            type="range"
+            id="b-slider"
+            min="0"
+            max="1000"
+            step="1"
+            value="137"
+            aria-valuenow="1.0"
+            aria-valuetext="1.0 : 1"
+          />
+          <div class="mt-2 text-center">
+            <output for="b-slider" class="font-mono text-lg" id="b-readout">1.0 : 1</output>
+          </div>
+        </div>
+
+        <div class="readout-grid">
+          <div class="readout-card">
+            <div class="readout-label">Edge (per £1 staked)</div>
+            <output for="p-slider b-slider" class="readout-value block" id="edge-output">+£0.10</output>
+          </div>
+          <div class="readout-card">
+            <div class="readout-label">Fair payout (<em>b</em> for zero edge)</div>
+            <output for="p-slider" class="readout-value block" id="fair-output">0.82 : 1</output>
+            <div class="readout-caption">the payout you'd need for a break-even bet at this probability</div>
+          </div>
+          <div class="readout-card">
+            <div class="readout-label">What % of your money to bet</div>
+            <output for="p-slider b-slider" class="readout-value block" id="kelly-output">10.00%</output>
+            <div class="readout-caption" id="kelly-caption">the Kelly fraction, <em>f</em><sup class="text-[0.65em]">*</sup></div>
+          </div>
+          <div class="readout-card">
+            <div class="readout-label">Suggested bet on £1,000 bankroll</div>
+            <output for="p-slider b-slider" class="readout-value block" id="bet-s2-output">£100</output>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── Part 3: Reference chips ─── */}
+      <div class="preset-chips" id="preset-chips" role="group" aria-label="Reference bet presets">
+        <button type="button" class="preset-chip" data-preset="lottery"
+          aria-label="Lottery: UK National Lotto. p = 1 in 45 million, £2 ticket, £3.8m jackpot. One of the worst bets you'll encounter.">
+          Lottery
+          <span class="chip-tooltip">UK National Lotto. p&nbsp;=&nbsp;1 in 45&nbsp;million, £2 ticket, £3.8m jackpot. One of the worst bets you'll encounter.</span>
+        </button>
+        <button type="button" class="preset-chip" data-preset="us-roulette"
+          aria-label="US Roulette: American roulette, red/black. Two green zeros give the house a 5.26% edge, nearly double European roulette.">
+          US Roulette
+          <span class="chip-tooltip">American roulette, red/black. Two green zeros (0 and 00) give the house a 5.26% edge, nearly double European roulette.</span>
+        </button>
+        <button type="button" class="preset-chip" data-preset="eu-roulette"
+          aria-label="EU Roulette: European roulette, red/black. One green zero gives the house a 2.70% edge, half the house edge of the American version.">
+          EU Roulette
+          <span class="chip-tooltip">European roulette, red/black. One green zero gives the house a 2.70% edge, half the house edge of the American version.</span>
+        </button>
+        <button type="button" class="preset-chip" data-preset="fair-coin"
+          aria-label="Fair Coin: A fair coin paying even money. Zero edge. Kelly says don't play; the house can't beat you, but gambler's ruin eventually will.">
+          Fair Coin
+          <span class="chip-tooltip">A fair coin paying even money. Zero edge. Kelly says don't play; the house can't beat you, but gambler's ruin eventually will.</span>
+        </button>
+        <button type="button" class="preset-chip" data-preset="biased-coin"
+          aria-label="Biased Coin: The coin from the opening question. A small positive edge. Kelly: bet 10% of your bankroll.">
+          Biased Coin
+          <span class="chip-tooltip">The coin from the opening question. A small positive edge. Kelly: bet 10% of your bankroll.</span>
+        </button>
+        <button type="button" class="preset-chip" data-preset="card-counter"
+          aria-label="Card Counter: A skilled blackjack card counter's edge when the count is favourable. Thin edge, tiny bets, long grind.">
+          Card Counter
+          <span class="chip-tooltip">A skilled blackjack card counter's edge when the count is favourable. Thin edge, tiny bets, long grind.</span>
+        </button>
+        <button type="button" class="preset-chip" data-preset="vc"
+          aria-label="Pre-seed VC: A pre-seed venture capital investment. Roughly 10% of investments return 20× or more; the rest go to zero. Large positive edge, but enormous variance.">
+          Pre-seed VC
+          <span class="chip-tooltip">A pre-seed venture capital investment. Roughly 10% of investments return 20× or more; the rest go to zero. Large positive edge, but enormous variance, which is why VCs diversify across 20–30 portfolio companies.</span>
+        </button>
+      </div>
+
+      {/* ─── Part 4: Transition prose ─── */}
+      <p class="mt-12">Knowing the Kelly fraction is half the job. Actually betting it, and living with the consequences, is the other half. Drag the chips above. Notice how the pre-seed VC's fraction is only 5.5%, despite the enormous edge. Notice how even a 55/45 coin has you only betting 10%. The formula is conservative for a reason. The next section shows you why.</p>
+
+      <div class="text-center mt-6">
+        <a
+          href="#simulator"
+          class="text-sm text-gold"
+          style="text-decoration: none;"
+          id="scroll-to-s3"
+        >scroll to see why ↓</a>
+      </div>
+    </section>
+
+    {/* ─── Stub sections 3–6 ─── */}
     {sections.map((s) => (
       <section id={s.id} class="max-w-prose mx-auto py-20 border-t border-ink/10">
         <div class="flex items-start gap-4 mb-8">
@@ -175,17 +319,17 @@ const sections = [
       let msg: string;
 
       if (x === 0) {
-        msg = `Safe — but you're leaving money on the table. At a 55% win rate, the maths says you should be betting. You picked £0; the optimal bet is £100.`;
+        msg = `Safe, but you're leaving money on the table. At a 55% win rate, the maths says you should be betting. You picked £0; the optimal bet is £100.`;
       } else if (x > 0 && x < 50) {
-        msg = `Cautious. You picked £${x}. The mathematically optimal bet is £100 — 10% of your bankroll. You're on the right side of the line, but under-betting your edge.`;
+        msg = `Cautious. You picked £${x}. The mathematically optimal bet is £100, or 10% of your bankroll. You're on the right side of the line, but under-betting your edge.`;
       } else if (x >= 50 && x <= 150 && x !== 100) {
-        msg = `Close. You picked £${x}. The mathematically optimal bet is £100 — 10% of your bankroll. You've clearly got the intuition; keep reading to see where the exact number comes from.`;
+        msg = `Close. You picked £${x}. The mathematically optimal bet is £100, or 10% of your bankroll. You've clearly got the intuition; keep reading to see where the exact number comes from.`;
       } else if (x === 100) {
-        msg = `Spot on. You picked £100 — exactly 10% of your bankroll. You've just rediscovered the ${kellyLink}, the mathematically optimal bet for a 55/45 coin paying even money. Keep reading to see why.`;
+        msg = `Spot on. You picked £100, exactly 10% of your bankroll. You've just rediscovered the ${kellyLink}, the mathematically optimal bet for a 55/45 coin paying even money. Keep reading to see why.`;
       } else if (x > 150 && x <= 500) {
         msg = `Bold. You picked £${x}. The mathematically optimal bet is £100. Betting at this level, even with a positive edge, dramatically increases your chance of going broke before the edge compounds. Keep reading to see why.`;
       } else {
-        msg = `Too bold. You picked £${x}. With this bet size, even a 55/45 edge mathematically guarantees ruin given enough rounds. The optimal bet is £100 — 10% of your bankroll. Keep reading to see why.`;
+        msg = `Too bold. You picked £${x}. With this bet size, even a 55/45 edge mathematically guarantees ruin given enough rounds. The optimal bet is £100, or 10% of your bankroll. Keep reading to see why.`;
       }
 
       responseText.innerHTML = msg;
@@ -201,5 +345,267 @@ const sections = [
       e.preventDefault();
       document.getElementById('edge')?.scrollIntoView({ behavior: 'smooth' });
     });
+  </script>
+
+  <script>
+    // ─── Section 2: Edge calculator ───
+
+    const LOG_B_MIN = Math.log10(0.1);         // -1
+    const LOG_B_MAX = Math.log10(2_000_000);    // ≈6.301
+    const LOG_B_RANGE = LOG_B_MAX - LOG_B_MIN;  // ≈7.301
+
+    function sliderToB(v: number): number {
+      return Math.pow(10, (v / 1000) * LOG_B_RANGE + LOG_B_MIN);
+    }
+
+    function bToSlider(b: number): number {
+      return ((Math.log10(b) - LOG_B_MIN) / LOG_B_RANGE) * 1000;
+    }
+
+    // Source-of-truth values (presets can set these outside slider range)
+    let currentP = 0.55;
+    let currentB = 1.0;
+
+    const pSlider = document.getElementById('p-slider') as HTMLInputElement;
+    const bSlider = document.getElementById('b-slider') as HTMLInputElement;
+    const pReadout = document.getElementById('p-readout')!;
+    const bReadout = document.getElementById('b-readout')!;
+    const edgeOutput = document.getElementById('edge-output')!;
+    const fairOutput = document.getElementById('fair-output')!;
+    const kellyOutput = document.getElementById('kelly-output')!;
+    const kellyCaption = document.getElementById('kelly-caption')!;
+    const betS2Output = document.getElementById('bet-s2-output')!;
+
+    const gbpFormat = new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+
+    const gbpWholeFormat = new Intl.NumberFormat('en-GB', {
+      style: 'currency',
+      currency: 'GBP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+
+    const intlNumber = new Intl.NumberFormat('en-GB');
+
+    function formatP(p: number): string {
+      const pct = p * 100;
+      if (pct >= 0.1) return pct.toFixed(1) + '%';
+      if (p > 0) return '1 in ' + intlNumber.format(Math.round(1 / p));
+      return '0.0%';
+    }
+
+    function formatB(b: number): string {
+      if (b < 100) return b.toFixed(1) + ' : 1';
+      return intlNumber.format(Math.round(b)) + ' : 1';
+    }
+
+    function formatFair(ratio: number): string {
+      if (ratio < 100) return ratio.toFixed(2) + ' : 1';
+      return intlNumber.format(Math.round(ratio)) + ' : 1';
+    }
+
+    function updateReadouts(): void {
+      const p = currentP;
+      const b = currentB;
+      const q = 1 - p;
+      const edge = b * p - q;
+      const fair = q / p;
+      const kelly = (b * p - q) / b;
+      const suggestedBet = Math.max(0, kelly * 1000);
+
+      // p readout
+      pReadout.textContent = formatP(p);
+
+      // b readout
+      bReadout.textContent = formatB(b);
+
+      // Edge
+      const edgeSign = edge >= 0 ? '+' : '';
+      edgeOutput.textContent = edgeSign + gbpFormat.format(edge);
+      edgeOutput.style.color = edge < 0 ? '#a8252c' : '';
+
+      // Fair payout
+      fairOutput.textContent = formatFair(fair);
+
+      // Kelly fraction
+      if (kelly <= 0) {
+        kellyOutput.textContent = '0.00%';
+        kellyCaption.innerHTML = 'Kelly recommends not betting on negative-edge games';
+      } else {
+        kellyOutput.textContent = (kelly * 100).toFixed(2) + '%';
+        kellyCaption.innerHTML = 'the Kelly fraction, <em>f</em><sup style="font-size:0.65em">*</sup>';
+      }
+
+      // Suggested bet
+      betS2Output.textContent = gbpWholeFormat.format(Math.round(suggestedBet));
+
+      // Update slider ARIA
+      pSlider.setAttribute('aria-valuenow', (p * 100).toFixed(1));
+      pSlider.setAttribute('aria-valuetext', formatP(p));
+      bSlider.setAttribute('aria-valuenow', b.toFixed(1));
+      bSlider.setAttribute('aria-valuetext', formatB(b));
+    }
+
+    // Slider input handlers
+    pSlider.addEventListener('input', () => {
+      currentP = parseInt(pSlider.value, 10) / 1000;
+      clearActiveChip();
+      updateReadouts();
+    });
+
+    bSlider.addEventListener('input', () => {
+      currentB = sliderToB(parseInt(bSlider.value, 10));
+      clearActiveChip();
+      updateReadouts();
+    });
+
+    // ─── Preset chips ───
+
+    interface Preset {
+      p: number;
+      b: number;
+    }
+
+    const presets: Record<string, Preset> = {
+      'lottery':       { p: 1 / 45_057_474, b: 1_899_999 },
+      'us-roulette':   { p: 18 / 38,        b: 1 },
+      'eu-roulette':   { p: 18 / 37,        b: 1 },
+      'fair-coin':     { p: 0.5,            b: 1 },
+      'biased-coin':   { p: 0.55,           b: 1 },
+      'card-counter':  { p: 0.51,           b: 1 },
+      'vc':            { p: 0.1,            b: 20 },
+    };
+
+    const chipButtons = document.querySelectorAll<HTMLButtonElement>('.preset-chip');
+    let activeChip: HTMLButtonElement | null = null;
+
+    function clearActiveChip(): void {
+      if (activeChip) {
+        activeChip.classList.remove('is-active');
+        activeChip = null;
+      }
+    }
+
+    function setActiveChip(btn: HTMLButtonElement): void {
+      clearActiveChip();
+      btn.classList.add('is-active');
+      activeChip = btn;
+    }
+
+    // Check reduced-motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function animatePreset(targetP: number, targetB: number, btn: HTMLButtonElement): void {
+      setActiveChip(btn);
+
+      if (prefersReducedMotion) {
+        // Instant update
+        currentP = targetP;
+        currentB = targetB;
+        pSlider.value = String(Math.max(1, Math.min(999, Math.round(targetP * 1000))));
+        bSlider.value = String(Math.max(0, Math.min(1000, Math.round(bToSlider(targetB)))));
+        updateReadouts();
+        return;
+      }
+
+      const startP = currentP;
+      const startB = currentB;
+      const startLogB = Math.log10(Math.max(startB, 1e-10));
+      const targetLogB = Math.log10(Math.max(targetB, 1e-10));
+      const duration = 300;
+      const startTime = performance.now();
+
+      function tick(now: number): void {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+        // Ease in-out quad
+        const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+        currentP = startP + (targetP - startP) * ease;
+        currentB = Math.pow(10, startLogB + (targetLogB - startLogB) * ease);
+
+        // Position sliders (clamped to their ranges)
+        pSlider.value = String(Math.max(1, Math.min(999, Math.round(currentP * 1000))));
+        bSlider.value = String(Math.max(0, Math.min(1000, Math.round(bToSlider(currentB)))));
+
+        updateReadouts();
+
+        if (t < 1) requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    chipButtons.forEach((btn) => {
+      const presetKey = btn.dataset.preset;
+      if (!presetKey || !presets[presetKey]) return;
+
+      btn.addEventListener('click', () => {
+        const preset = presets[presetKey];
+        animatePreset(preset.p, preset.b, btn);
+
+        // Scroll calculator into view if off-screen
+        const calc = document.getElementById('edge-calculator');
+        if (calc) {
+          const rect = calc.getBoundingClientRect();
+          if (rect.top < 0 || rect.bottom > window.innerHeight) {
+            calc.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' });
+          }
+        }
+      });
+    });
+
+    // Chip tooltip: touch-to-toggle on mobile
+    // On touch devices, first tap shows tooltip; second tap or tap-outside dismisses.
+    // We detect touch via the 'ontouchstart' check.
+    const isTouch = 'ontouchstart' in window;
+
+    if (isTouch) {
+      let activeTooltipChip: HTMLButtonElement | null = null;
+
+      chipButtons.forEach((btn) => {
+        btn.addEventListener('touchstart', (e) => {
+          // If this chip already has tooltip showing, let the click through (applies preset)
+          if (btn.classList.contains('tooltip-active')) {
+            btn.classList.remove('tooltip-active');
+            activeTooltipChip = null;
+            return;
+          }
+
+          // Show tooltip on first tap, suppress click
+          e.preventDefault();
+
+          // Dismiss any other active tooltip
+          if (activeTooltipChip && activeTooltipChip !== btn) {
+            activeTooltipChip.classList.remove('tooltip-active');
+          }
+
+          btn.classList.add('tooltip-active');
+          activeTooltipChip = btn;
+        }, { passive: false });
+      });
+
+      // Dismiss tooltip on tap-outside
+      document.addEventListener('touchstart', (e) => {
+        if (activeTooltipChip && !(e.target as Element).closest('.preset-chip')) {
+          activeTooltipChip.classList.remove('tooltip-active');
+          activeTooltipChip = null;
+        }
+      });
+    }
+
+    // Scroll link for transition to section 3
+    document.getElementById('scroll-to-s3')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('simulator')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Initial render
+    updateReadouts();
   </script>
 </Base>
