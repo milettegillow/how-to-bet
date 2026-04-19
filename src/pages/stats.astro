@@ -46,14 +46,23 @@ try {
       redis.get<number>('alltime:scrolled_to_bottom'),
     ]);
 
+    // Coerce to numbers - Redis may return strings
+    const nVisitors = Number(visitors) || 0;
+    const nVisitorsToday = Number(visitorsToday) || 0;
+    const nTotalTimeMs = Number(totalTimeMs) || 0;
+    const nSessionCount = Number(sessionCountWithTime) || 0;
+    const nSimsRun = Number(simulationsRun) || 0;
+    const nSessionsRan = Number(sessionsRan) || 0;
+    const nScrolled = Number(scrolledToBottom) || 0;
+
     data = {
-      visitors: visitors || 0,
-      visitorsToday: visitorsToday || 0,
-      avgTimeMs: (sessionCountWithTime && totalTimeMs) ? totalTimeMs / sessionCountWithTime : 0,
-      sessionCountWithTime: sessionCountWithTime || 0,
-      simulationsRun: simulationsRun || 0,
-      sessionsRan: sessionsRan || 0,
-      scrolledToBottom: scrolledToBottom || 0,
+      visitors: nVisitors,
+      visitorsToday: nVisitorsToday,
+      avgTimeMs: nSessionCount > 0 ? nTotalTimeMs / nSessionCount : 0,
+      sessionCountWithTime: nSessionCount,
+      simulationsRun: nSimsRun,
+      sessionsRan: nSessionsRan,
+      scrolledToBottom: nScrolled,
     };
   }
 } catch (err) {
@@ -95,8 +104,8 @@ const now = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
 
       {!kvConfigured ? (
         <div class="mt-12 text-center py-12 border border-ink/10 rounded" style="background: #f8f7f4;">
-          <p class="text-ink/40 italic">No data yet - KV not configured.</p>
-          <p class="text-sm text-ink/30 mt-2">Provision a Redis store in the Vercel dashboard under Storage.</p>
+          <p class="text-ink/40 italic">Storage not yet configured.</p>
+          <p class="text-sm text-ink/30 mt-2">Install Upstash for Redis from Vercel Storage > Marketplace.</p>
         </div>
       ) : (
         <div class="mt-12">

@@ -1,7 +1,7 @@
 /**
  * POST /api/track - receives analytics events from the client.
  *
- * Uses Upstash Redis (Vercel KV) for storage.
+ * Uses Upstash Redis for storage.
  * Privacy: no raw IPs stored, only transient hashed rate-limit keys.
  */
 
@@ -92,7 +92,7 @@ export const POST: APIRoute = async ({ request }) => {
 
       case 'ran_simulation': {
         const ranKey = `session:${sessionId}:ran_simulation`;
-        const prevCount = (await redis.get<number>(ranKey)) || 0;
+        const prevCount = Number(await redis.get(ranKey)) || 0;
         if (prevCount === 0) {
           await redis.incr(`daily:${date}:sessions_that_ran`);
           await redis.incr('alltime:sessions_that_ran');
