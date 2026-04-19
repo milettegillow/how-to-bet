@@ -3,7 +3,6 @@ import Base from '../layouts/Base.astro';
 import '../styles/global.css';
 
 const sections = [
-  { num: 3, id: 'simulator', title: 'The main event: the simulator' },
   { num: 4, id: 'kelly', title: 'Full Kelly vs half Kelly' },
   { num: 5, id: 'ruin', title: 'The warning: Gambler\'s Ruin' },
   { num: 6, id: 'beyond', title: 'Beyond the casino' },
@@ -171,9 +170,9 @@ const sections = [
             <output for="p-slider b-slider" class="readout-value block" id="kelly-output">10.00%</output>
             <div class="readout-caption" id="kelly-caption">the Kelly fraction, <em>f</em><sup class="text-[0.65em]">*</sup></div>
           </div>
-          <div class="readout-card">
+          <div class="readout-card readout-card-hero">
             <div class="readout-label">Suggested bet on £1,000 bankroll</div>
-            <output for="p-slider b-slider" class="readout-value block" id="bet-s2-output">£100</output>
+            <output for="p-slider b-slider" class="readout-value block text-card-red font-bold" id="bet-s2-output">£100</output>
           </div>
         </div>
       </div>
@@ -218,7 +217,7 @@ const sections = [
       </div>
 
       {/* ─── Part 4: Transition prose ─── */}
-      <p class="mt-12">Knowing the Kelly fraction is half the job. Actually betting it, and living with the consequences, is the other half. Drag the chips above. Notice how the pre-seed VC's fraction is only 5.5%, despite the enormous edge. Notice how even a 55/45 coin has you only betting 10%. The formula is conservative for a reason. The next section shows you why.</p>
+      <p class="mt-12">Notice how the pre-seed VC's fraction is only 5.5%, despite the enormous edge. Notice how even a 55/45 coin has you only betting 10%. The formula is conservative for a reason. The next section shows you why.</p>
 
       <div class="text-center mt-6">
         <a
@@ -230,7 +229,153 @@ const sections = [
       </div>
     </section>
 
-    {/* ─── Stub sections 3–6 ─── */}
+    {/* ─── Section 3: The main event ─── */}
+    <section id="simulator" class="max-w-prose mx-auto py-20 border-t border-ink/10">
+      <div class="flex items-start gap-4 mb-8">
+        <img src="/chip-3.png" alt="" width="48" height="48" loading="lazy" class="section-chip-img hidden sm:block" />
+        <h2 class="mt-0" style="margin-top: 0;">
+          <img src="/chip-3.png" alt="" width="32" height="32" loading="lazy" class="section-chip-img inline sm:hidden mr-2 align-middle" />
+          The main event
+        </h2>
+      </div>
+
+      <p>Kelly gives you a number. The simulator lets you disobey it. Pick your bet, pick how much of Kelly to actually wager, and run it a thousand times to see what you'd have ended up with.</p>
+
+      {/* Controls */}
+      <div class="mt-10">
+        <div class="sim-control-group">
+          <label for="sim-bankroll">Starting bankroll (£)</label>
+          <input type="range" id="sim-bankroll" min="0" max="3000" step="1" value="1000" />
+          <div class="mt-1 text-center">
+            <output for="sim-bankroll" class="font-mono text-sm" id="sim-bankroll-readout">£1,000</output>
+          </div>
+        </div>
+
+        <div class="sim-control-group">
+          <label for="sim-rounds">Number of rounds</label>
+          <input type="range" id="sim-rounds" min="10" max="2000" step="10" value="500" />
+          <div class="mt-1 text-center">
+            <output for="sim-rounds" class="font-mono text-sm" id="sim-rounds-readout">500</output>
+          </div>
+        </div>
+
+        <div class="sim-control-group">
+          <label for="sim-p">Win probability (<em>p</em>)</label>
+          <input type="range" id="sim-p" min="1" max="999" step="1" value="550" />
+          <div class="mt-1 text-center">
+            <output for="sim-p" class="font-mono text-sm" id="sim-p-readout">55.0%</output>
+          </div>
+        </div>
+
+        <div class="sim-control-group">
+          <label for="sim-b">Payout (<em>b</em>&thinsp;:&thinsp;1)</label>
+          <input type="range" id="sim-b" min="0" max="3000" step="1" value="1000" />
+          <div class="mt-1 text-center">
+            <output for="sim-b" class="font-mono text-sm" id="sim-b-readout">1.0 : 1</output>
+          </div>
+        </div>
+
+        <div class="sim-control-group">
+          <label for="sim-kelly">Kelly multiplier</label>
+          <div class="sim-control-note">1x = full Kelly. 0.5x = half Kelly. Anything above 2x enters territory where even a positive edge goes bankrupt.</div>
+          <input type="range" id="sim-kelly" min="0" max="25" step="1" value="10" />
+          <div class="mt-1 text-center">
+            <output for="sim-kelly" class="font-mono text-sm" id="sim-kelly-readout">1.0x</output>
+          </div>
+        </div>
+
+        <div class="sim-control-group">
+          <label>Simulation paths</label>
+          <div class="paths-btn-group">
+            <button type="button" class="paths-btn" data-paths="100">100</button>
+            <button type="button" class="paths-btn is-active" data-paths="1000">1K</button>
+            <button type="button" class="paths-btn" data-paths="10000">10K</button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Preset rows */}
+      <div class="mt-8">
+        <div class="mb-4">
+          <div class="text-sm font-medium mb-2">Scenarios</div>
+          <div class="preset-row" role="group" aria-label="Scenario presets">
+            <button type="button" class="preset-row-chip" data-scenario="biased-coin" aria-label="Biased Coin: p=0.55, b=1, £1,000, 500 rounds">🪙 Biased Coin</button>
+            <button type="button" class="preset-row-chip" data-scenario="fair-coin" aria-label="Fair Coin: p=0.50, b=1, £1,000, 500 rounds">⚪ Fair Coin</button>
+            <button type="button" class="preset-row-chip" data-scenario="card-counter" aria-label="Card Counter: p=0.51, b=1, £1,000, 2,000 rounds">🎯 Card Counter</button>
+            <button type="button" class="preset-row-chip" data-scenario="eu-roulette" aria-label="EU Roulette: p=0.4865, b=1, £1,000, 500 rounds">🎰 EU Roulette</button>
+            <button type="button" class="preset-row-chip" data-scenario="us-roulette" aria-label="US Roulette: p=0.4737, b=1, £1,000, 500 rounds">🎰 US Roulette</button>
+            <button type="button" class="preset-row-chip" data-scenario="vc" aria-label="Pre-seed VC: p=0.1, b=20, £10,000, 30 rounds">🚀 Pre-seed VC</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="text-sm font-medium mb-2">Kelly strategies</div>
+          <div class="preset-row" role="group" aria-label="Kelly strategy presets">
+            <button type="button" class="preset-row-chip" data-strategy="quarter" aria-label="Quarter Kelly: 0.25x">♠ Quarter Kelly</button>
+            <button type="button" class="preset-row-chip" data-strategy="half" aria-label="Half Kelly: 0.5x">♥ Half Kelly</button>
+            <button type="button" class="preset-row-chip" data-strategy="full" aria-label="Full Kelly: 1.0x">♦ Full Kelly</button>
+            <button type="button" class="preset-row-chip" data-strategy="over" aria-label="Over-Kelly: 2.1x">♣ Over-Kelly</button>
+          </div>
+        </div>
+      </div>
+
+      {/* Figure 1: Kelly curve (analytical) */}
+      <figure class="mt-10 mb-8">
+        <div id="chart-kelly-curve" class="sim-chart-container" role="img" aria-label="Theoretical growth rate by Kelly multiplier"></div>
+        <figcaption>Figure 1 - Theoretical growth rate by Kelly multiplier. Your current choice is marked. Above 2x, growth goes negative: even a positive-edge bet loses money on average.</figcaption>
+      </figure>
+
+      {/* Figure 2: Log-wealth trajectories */}
+      <figure class="mb-8">
+        <div id="chart-wealth" class="sim-chart-container" role="img" aria-label="Bankroll trajectory chart showing median and percentile bands">
+          <div class="sim-chart-placeholder">Click "Run simulation" to start</div>
+        </div>
+        <figcaption id="chart-wealth-caption">Figure 2 - Median bankroll trajectory, with 10th to 90th percentile band.</figcaption>
+      </figure>
+
+      {/* Run button + Reset */}
+      <div class="mt-4 mb-2">
+        <button type="button" id="sim-run" class="btn-primary w-full" style="font-size: 0.95rem; padding: 0.6rem 1rem;">Run simulation</button>
+      </div>
+      <div class="text-center mb-8">
+        <a href="#" id="sim-reset" class="text-sm text-ink/40 hover:text-ink/60" style="text-decoration: none; font-style: italic;">Reset</a>
+      </div>
+
+      {/* Stats */}
+      <div class="readout-grid" id="sim-stats" aria-live="polite">
+        <div class="readout-card">
+          <div class="readout-label">Mean final wealth</div>
+          <output class="readout-value block" id="stat-mean">-</output>
+          <div class="readout-caption">mean can be misleading when the distribution is skewed; look at median too</div>
+        </div>
+        <div class="readout-card">
+          <div class="readout-label">Bankruptcy rate</div>
+          <output class="readout-value block" id="stat-bankrupt">-</output>
+        </div>
+        <div class="readout-card">
+          <div class="readout-label">% of paths that beat starting bankroll</div>
+          <output class="readout-value block" id="stat-beat">-</output>
+        </div>
+        <div class="readout-card readout-card-hero">
+          <div class="readout-label">Median final wealth</div>
+          <output class="readout-value block text-card-red font-bold" id="stat-median">-</output>
+        </div>
+      </div>
+
+      {/* Transition prose */}
+      <div class="mt-12">
+        <p>Try the over-Kelly preset. Same coin, same edge. The only difference is bet size. Look at the bankruptcy rate.</p>
+
+        <p>Most professional gamblers bet half Kelly, not full. The next section explains why.</p>
+
+        <div class="text-center mt-6">
+          <a href="#kelly" class="text-sm text-gold" style="text-decoration: none;" id="scroll-to-s4">scroll to see why ↓</a>
+        </div>
+      </div>
+    </section>
+
+    {/* ─── Stub sections 4–6 ─── */}
     {sections.map((s) => (
       <section id={s.id} class="max-w-prose mx-auto py-20 border-t border-ink/10">
         <div class="flex items-start gap-4 mb-8">
@@ -604,5 +749,473 @@ const sections = [
 
     // Initial render
     updateReadouts();
+  </script>
+
+  <script>
+    // ─── Section 3: Simulator ───
+    import * as Plot from "@observablehq/plot";
+    import { runSimulation, kellyFraction, growthRate } from "../lib/kelly";
+    import type { SimConfig, SimResult } from "../lib/kelly";
+
+    // Log-scale helpers
+    function sliderToBankroll(v: number): number {
+      return Math.pow(10, (v / 3000) * 3 + 2);
+    }
+    function bankrollToSlider(val: number): number {
+      return ((Math.log10(val) - 2) / 3) * 3000;
+    }
+    function sliderToSimB(v: number): number {
+      return Math.pow(10, (v / 3000) * 3 - 1);
+    }
+    function simBToSlider(b: number): number {
+      return ((Math.log10(b) + 1) / 3) * 3000;
+    }
+
+    // DOM refs
+    const simBankrollSlider = document.getElementById('sim-bankroll') as HTMLInputElement;
+    const simRoundsSlider = document.getElementById('sim-rounds') as HTMLInputElement;
+    const simPSlider = document.getElementById('sim-p') as HTMLInputElement;
+    const simBSlider = document.getElementById('sim-b') as HTMLInputElement;
+    const simKellySlider = document.getElementById('sim-kelly') as HTMLInputElement;
+
+    const simBankrollReadout = document.getElementById('sim-bankroll-readout')!;
+    const simRoundsReadout = document.getElementById('sim-rounds-readout')!;
+    const simPReadout = document.getElementById('sim-p-readout')!;
+    const simBReadout = document.getElementById('sim-b-readout')!;
+    const simKellyReadout = document.getElementById('sim-kelly-readout')!;
+
+    const simRunBtn = document.getElementById('sim-run') as HTMLButtonElement;
+    const simResetLink = document.getElementById('sim-reset')!;
+
+    const chartWealthEl = document.getElementById('chart-wealth')!;
+    const chartKellyEl = document.getElementById('chart-kelly-curve')!;
+    const chartWealthCaption = document.getElementById('chart-wealth-caption')!;
+
+    const statMedian = document.getElementById('stat-median')!;
+    const statMean = document.getElementById('stat-mean')!;
+    const statBankrupt = document.getElementById('stat-bankrupt')!;
+    const statBeat = document.getElementById('stat-beat')!;
+
+    // State
+    let simPaths = 1000;
+    // Previous stat values for tweening
+    let prevStats = { median: 0, mean: 0, bankrupt: 0, beat: 0 };
+    let hasRunOnce = false;
+
+    const gbpSim = new Intl.NumberFormat('en-GB', {
+      style: 'currency', currency: 'GBP',
+      minimumFractionDigits: 0, maximumFractionDigits: 0,
+    });
+    const intlSim = new Intl.NumberFormat('en-GB');
+
+    const simReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ─── Readout updaters ───
+
+    function updateSimBankrollReadout(): void {
+      simBankrollReadout.textContent = gbpSim.format(Math.round(sliderToBankroll(parseInt(simBankrollSlider.value))));
+    }
+    function updateSimRoundsReadout(): void {
+      simRoundsReadout.textContent = simRoundsSlider.value;
+    }
+    function updateSimPReadout(): void {
+      simPReadout.textContent = (parseInt(simPSlider.value) / 10).toFixed(1) + '%';
+    }
+    function updateSimBReadout(): void {
+      const b = sliderToSimB(parseInt(simBSlider.value));
+      simBReadout.textContent = (b < 100 ? b.toFixed(1) : Math.round(b).toString()) + ' : 1';
+    }
+    function updateSimKellyReadout(): void {
+      simKellyReadout.textContent = (parseInt(simKellySlider.value) / 10).toFixed(1) + 'x';
+    }
+    function updateAllReadouts(): void {
+      updateSimBankrollReadout();
+      updateSimRoundsReadout();
+      updateSimPReadout();
+      updateSimBReadout();
+      updateSimKellyReadout();
+    }
+
+    // ─── Preset row state ───
+
+    function clearScenarioPreset(): void {
+      document.querySelectorAll('[data-scenario].is-active').forEach(el => el.classList.remove('is-active'));
+    }
+    function clearStrategyPreset(): void {
+      document.querySelectorAll('[data-strategy].is-active').forEach(el => el.classList.remove('is-active'));
+    }
+
+    // ─── Slider listeners ───
+
+    simBankrollSlider.addEventListener('input', () => { updateSimBankrollReadout(); clearScenarioPreset(); });
+    simRoundsSlider.addEventListener('input', () => { updateSimRoundsReadout(); clearScenarioPreset(); });
+    simPSlider.addEventListener('input', () => { updateSimPReadout(); clearScenarioPreset(); renderKellyCurve(); });
+    simBSlider.addEventListener('input', () => { updateSimBReadout(); clearScenarioPreset(); renderKellyCurve(); });
+    simKellySlider.addEventListener('input', () => { updateSimKellyReadout(); clearStrategyPreset(); renderKellyCurve(); });
+
+    // Paths buttons
+    document.querySelectorAll<HTMLButtonElement>('.paths-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.paths-btn').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        simPaths = parseInt(btn.dataset.paths!);
+      });
+    });
+
+    // ─── Build config from current sliders ───
+
+    function getSimConfig(): SimConfig {
+      return {
+        bankroll: Math.round(sliderToBankroll(parseInt(simBankrollSlider.value))),
+        rounds: parseInt(simRoundsSlider.value),
+        p: parseInt(simPSlider.value) / 1000,
+        b: sliderToSimB(parseInt(simBSlider.value)),
+        kellyMultiplier: parseInt(simKellySlider.value) / 10,
+        paths: simPaths,
+      };
+    }
+
+    // ─── Chart: Log-wealth trajectories (Figure 2) ───
+
+    function renderWealthChart(result: SimResult, config: SimConfig): void {
+      const width = chartWealthEl.clientWidth || 600;
+      const rounds = config.rounds;
+      const startBankroll = config.bankroll;
+
+      const data: { round: number; median: number; p10: number; p90: number }[] = [];
+      for (let i = 0; i <= rounds; i++) {
+        data.push({
+          round: i,
+          median: Math.max(result.medianTrajectory[i], 0.1),
+          p10: Math.max(result.p10Trajectory[i], 0.1),
+          p90: Math.max(result.p90Trajectory[i], 0.1),
+        });
+      }
+
+      const maxP90 = Math.max(...result.p90Trajectory);
+      const yTop = Math.max(maxP90 * 2, startBankroll * 10);
+      const yBottom = Math.min(0.1, startBankroll * 0.01);
+
+      const chart = Plot.plot({
+        width,
+        height: 320,
+        style: {
+          fontFamily: '"EB Garamond", Georgia, serif',
+          fontSize: '13px',
+          background: 'transparent',
+        },
+        x: { label: "Round", domain: [0, rounds] },
+        y: {
+          type: "log",
+          label: "↑ Bankroll (£)",
+          domain: [yBottom, yTop],
+          grid: true,
+          ticks: 6,
+        },
+        marks: [
+          Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
+          Plot.areaY(data, {
+            x: "round", y1: "p10", y2: "p90",
+            fill: "#a8252c", fillOpacity: 0.12,
+            curve: "monotone-x",
+          }),
+          Plot.lineY(data, {
+            x: "round", y: "median",
+            stroke: "#a8252c", strokeWidth: 2.5,
+            curve: "monotone-x",
+          }),
+          Plot.ruleY([startBankroll], {
+            stroke: "#a8252c", strokeDasharray: "6,4", strokeOpacity: 0.4,
+          }),
+        ],
+      });
+
+      chartWealthEl.innerHTML = '';
+      chartWealthEl.appendChild(chart);
+
+      // Animate line draw-in and band fade-in
+      if (!simReducedMotion) {
+        const svg = chartWealthEl.querySelector('svg');
+        if (svg) {
+          // Find the median line (last path with card-red stroke)
+          const paths = svg.querySelectorAll('path[stroke="#a8252c"]');
+          const medianLine = paths[paths.length - 1];
+          if (medianLine) {
+            const len = (medianLine as SVGPathElement).getTotalLength();
+            (medianLine as SVGElement).style.strokeDasharray = String(len);
+            (medianLine as SVGElement).style.strokeDashoffset = String(len);
+            (medianLine as SVGElement).style.transition = 'stroke-dashoffset 500ms ease-out';
+            requestAnimationFrame(() => {
+              (medianLine as SVGElement).style.strokeDashoffset = '0';
+            });
+          }
+          // Find the area band (path with card-red fill)
+          const band = svg.querySelector('path[fill="#a8252c"]');
+          if (band) {
+            (band as SVGElement).style.opacity = '0';
+            (band as SVGElement).style.transition = 'opacity 500ms ease-out';
+            requestAnimationFrame(() => {
+              (band as SVGElement).style.opacity = '1';
+            });
+          }
+        }
+      }
+
+      // All-bankrupt notice
+      if (result.bankruptcyRate >= 1) {
+        const bankruptRound = result.medianTrajectory.findIndex(v => v <= 0.01);
+        const notice = document.createElement('div');
+        notice.className = 'sim-chart-notice';
+        notice.textContent = `All paths bankrupt by round ${bankruptRound > 0 ? bankruptRound : rounds}`;
+        chartWealthEl.appendChild(notice);
+      }
+
+      chartWealthCaption.textContent =
+        `Figure 2 - Median bankroll trajectory, with 10th to 90th percentile band, across ${intlSim.format(config.paths)} paths.`;
+    }
+
+    // ─── Chart: Kelly curve (Figure 1, analytical) ───
+
+    function renderKellyCurve(): void {
+      const width = chartKellyEl.clientWidth || 600;
+      const p = parseInt(simPSlider.value) / 1000;
+      const b = sliderToSimB(parseInt(simBSlider.value));
+      const currentMult = parseInt(simKellySlider.value) / 10;
+      const kelly = Math.abs(kellyFraction(p, b));
+
+      const data: { mult: number; growth: number; pos: number; neg: number }[] = [];
+      for (let m = 0; m <= 2.5; m += 0.005) {
+        const f = kelly * m;
+        let g: number;
+        if (f <= 0) g = 0;
+        else if (f >= 0.999) g = -0.5;
+        else {
+          g = growthRate(f, p, b);
+          if (g < -0.5) g = -0.5;
+        }
+        data.push({
+          mult: Math.round(m * 1000) / 1000,
+          growth: g,
+          pos: Math.max(0, g),
+          neg: Math.min(0, g),
+        });
+      }
+
+      const peakGrowth = kelly > 0 ? growthRate(kelly, p, b) : 0;
+      const peakMarks = kelly > 0 ? [
+        Plot.dot([{ x: 1, y: peakGrowth }], {
+          x: "x", y: "y", fill: "#a8252c", r: 4,
+        }),
+        Plot.text([{ x: 1, y: peakGrowth }], {
+          x: "x", y: "y", text: ["Full Kelly"],
+          dy: -14, fill: "#a8252c", fontSize: 12, fontWeight: "600",
+        }),
+      ] : [];
+
+      const chart = Plot.plot({
+        width,
+        height: 240,
+        style: {
+          fontFamily: '"EB Garamond", Georgia, serif',
+          fontSize: '13px',
+          background: 'transparent',
+        },
+        x: { label: "Kelly multiplier", domain: [0, 2.5] },
+        y: { label: "↑ Growth rate (per round)", grid: true },
+        marks: [
+          Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
+          Plot.areaY(data, { x: "mult", y: "pos", fill: "#a8252c", fillOpacity: 0.08, curve: "natural" }),
+          Plot.areaY(data, { x: "mult", y: "neg", fill: "#6b7f5e", fillOpacity: 0.08, curve: "natural" }),
+          Plot.ruleY([0], { stroke: "#1a1a1a", strokeOpacity: 0.15 }),
+          Plot.lineY(data, { x: "mult", y: "growth", stroke: "#1a1a1a", strokeWidth: 2, curve: "natural" }),
+          Plot.ruleX([currentMult], { stroke: "#a8252c", strokeWidth: 1.5, strokeDasharray: "4,3" }),
+          ...peakMarks,
+        ],
+      });
+
+      chartKellyEl.innerHTML = '';
+      chartKellyEl.appendChild(chart);
+    }
+
+    // ─── Stats with animated tweening ───
+
+    function tweenStats(result: SimResult): void {
+      const targets = {
+        median: Math.round(result.medianFinal),
+        mean: Math.round(result.meanFinal),
+        bankrupt: result.bankruptcyRate * 100,
+        beat: result.beatStartRate * 100,
+      };
+
+      if (simReducedMotion || !hasRunOnce) {
+        statMedian.textContent = gbpSim.format(targets.median);
+        statMean.textContent = gbpSim.format(targets.mean);
+        statBankrupt.textContent = targets.bankrupt.toFixed(1) + '%';
+        statBeat.textContent = targets.beat.toFixed(1) + '%';
+        prevStats = targets;
+        hasRunOnce = true;
+        return;
+      }
+
+      const starts = { ...prevStats };
+      const duration = 700;
+      const startTime = performance.now();
+
+      function tick(now: number): void {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+        // Ease-out cubic
+        const ease = 1 - Math.pow(1 - t, 3);
+
+        const curMedian = starts.median + (targets.median - starts.median) * ease;
+        const curMean = starts.mean + (targets.mean - starts.mean) * ease;
+        const curBankrupt = starts.bankrupt + (targets.bankrupt - starts.bankrupt) * ease;
+        const curBeat = starts.beat + (targets.beat - starts.beat) * ease;
+
+        statMedian.textContent = gbpSim.format(Math.round(curMedian));
+        statMean.textContent = gbpSim.format(Math.round(curMean));
+        statBankrupt.textContent = curBankrupt.toFixed(1) + '%';
+        statBeat.textContent = curBeat.toFixed(1) + '%';
+
+        if (t < 1) requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+      prevStats = targets;
+      hasRunOnce = true;
+    }
+
+    // ─── Run simulation ───
+
+    let runLocked = false;
+
+    async function doRun(): Promise<void> {
+      if (runLocked) return;
+      runLocked = true;
+      simRunBtn.textContent = 'Running…';
+      simRunBtn.disabled = true;
+      const runStartTime = performance.now();
+
+      // Yield to browser for paint
+      await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+      const config = getSimConfig();
+      const result = runSimulation(config);
+
+      renderWealthChart(result, config);
+      renderKellyCurve();
+      tweenStats(result);
+
+      // Enforce minimum 300ms "Running…" display
+      const elapsed = performance.now() - runStartTime;
+      const remaining = Math.max(0, 300 - elapsed);
+
+      // Re-enable after 700ms total for stat tween to finish
+      const reEnableDelay = simReducedMotion ? remaining : Math.max(remaining, 700);
+
+      setTimeout(() => {
+        simRunBtn.textContent = 'Run simulation';
+        simRunBtn.disabled = false;
+        runLocked = false;
+      }, reEnableDelay);
+    }
+
+    simRunBtn.addEventListener('click', doRun);
+
+    // ─── Reset ───
+
+    simResetLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      simBankrollSlider.value = '1000';
+      simRoundsSlider.value = '500';
+      simPSlider.value = '550';
+      simBSlider.value = '1000';
+      simKellySlider.value = '10';
+      simPaths = 1000;
+
+      document.querySelectorAll('.paths-btn').forEach(b => {
+        b.classList.toggle('is-active', (b as HTMLElement).dataset.paths === '1000');
+      });
+
+      updateAllReadouts();
+      clearScenarioPreset();
+      clearStrategyPreset();
+
+      chartWealthEl.innerHTML = '<div class="sim-chart-placeholder">Click "Run simulation" to start</div>';
+      statMedian.textContent = '-';
+      statMean.textContent = '-';
+      statBankrupt.textContent = '-';
+      statBeat.textContent = '-';
+      prevStats = { median: 0, mean: 0, bankrupt: 0, beat: 0 };
+      hasRunOnce = false;
+
+      renderKellyCurve();
+    });
+
+    // ─── Scenario presets (Row A) ───
+
+    interface Scenario { bankroll: number; rounds: number; p: number; b: number; }
+
+    const scenarios: Record<string, Scenario> = {
+      'biased-coin':  { bankroll: 1000,  rounds: 500,  p: 0.55,   b: 1 },
+      'fair-coin':    { bankroll: 1000,  rounds: 500,  p: 0.50,   b: 1 },
+      'card-counter': { bankroll: 1000,  rounds: 2000, p: 0.51,   b: 1 },
+      'eu-roulette':  { bankroll: 1000,  rounds: 500,  p: 0.4865, b: 1 },
+      'us-roulette':  { bankroll: 1000,  rounds: 500,  p: 0.4737, b: 1 },
+      'vc':           { bankroll: 10000, rounds: 30,   p: 0.1,    b: 20 },
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('[data-scenario]').forEach(btn => {
+      const key = btn.dataset.scenario!;
+      if (!scenarios[key]) return;
+
+      btn.addEventListener('click', () => {
+        const s = scenarios[key];
+        simBankrollSlider.value = String(Math.round(bankrollToSlider(s.bankroll)));
+        simRoundsSlider.value = String(s.rounds);
+        simPSlider.value = String(Math.round(s.p * 1000));
+        simBSlider.value = String(Math.round(simBToSlider(s.b)));
+        updateAllReadouts();
+
+        clearScenarioPreset();
+        btn.classList.add('is-active');
+
+        doRun();
+      });
+    });
+
+    // ─── Strategy presets (Row B) ───
+
+    const strategies: Record<string, number> = {
+      'quarter': 0.25,
+      'half':    0.5,
+      'full':    1.0,
+      'over':    2.1,
+    };
+
+    document.querySelectorAll<HTMLButtonElement>('[data-strategy]').forEach(btn => {
+      const key = btn.dataset.strategy!;
+      if (!(key in strategies)) return;
+
+      btn.addEventListener('click', () => {
+        simKellySlider.value = String(Math.round(strategies[key] * 10));
+        updateSimKellyReadout();
+
+        clearStrategyPreset();
+        btn.classList.add('is-active');
+
+        renderKellyCurve();
+        doRun();
+      });
+    });
+
+    // Scroll link
+    document.getElementById('scroll-to-s4')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('kelly')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Initial Kelly curve render
+    renderKellyCurve();
   </script>
 </Base>
