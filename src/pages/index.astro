@@ -1224,19 +1224,30 @@ import '../styles/global.css';
       if (kf <= 0) {
         kellySaysEl.textContent = "Kelly suggests not betting on this scenario.";
         summaryOdds.textContent = (p * 100).toFixed(1) + '%';
-        summaryPayout.innerHTML = formatCurrency(0);
-        summaryBet.innerHTML = formatCurrency(0);
+        summaryPayout.textContent = '-';
+        summaryPayout.style.color = '';
+        summaryBet.innerHTML = '£0';
         document.querySelectorAll<HTMLButtonElement>('[data-kelly-mult]').forEach(btn => {
           btn.style.opacity = '0.4';
+          btn.style.cursor = 'not-allowed';
+          btn.dataset.disabled = '1';
         });
-        document.getElementById('bet-summary')!.style.opacity = '0.4';
+        // Remove gold tint from rec button when disabled
+        const recBtn = document.querySelector<HTMLButtonElement>('.kelly-btn-rec');
+        if (recBtn) recBtn.style.background = '';
+        document.getElementById('bet-summary')!.style.opacity = '0.5';
       } else {
         const kellyBet = kf * simBankroll;
         const kellyPct = (kf * 100).toFixed(1);
         kellySaysEl.innerHTML = `Kelly suggests betting ${kellyPct}% of bankroll, i.e. ${formatCurrency(Math.round(kellyBet))}.`;
         document.querySelectorAll<HTMLButtonElement>('[data-kelly-mult]').forEach(btn => {
           btn.style.opacity = '';
+          btn.style.cursor = '';
+          delete btn.dataset.disabled;
         });
+        // Restore gold tint on rec button
+        const recBtn = document.querySelector<HTMLButtonElement>('.kelly-btn-rec');
+        if (recBtn) recBtn.style.background = '';
         document.getElementById('bet-summary')!.style.opacity = '';
 
         const actualFrac = Math.abs(kf) * simKellyMult;
@@ -1245,6 +1256,7 @@ import '../styles/global.css';
 
         summaryOdds.textContent = (p * 100).toFixed(1) + '%';
         summaryPayout.innerHTML = formatCurrency(Math.round(winProfit));
+        summaryPayout.style.color = '';
         summaryBet.innerHTML = formatCurrency(Math.round(actualBet));
       }
     }
@@ -1274,6 +1286,7 @@ import '../styles/global.css';
     // Kelly multiplier buttons
     document.querySelectorAll<HTMLButtonElement>('[data-kelly-mult]').forEach(btn => {
       btn.addEventListener('click', () => {
+        if (btn.dataset.disabled === '1') return;
         document.querySelectorAll('[data-kelly-mult]').forEach(b => b.classList.remove('is-active'));
         btn.classList.add('is-active');
         simKellyMult = parseFloat(btn.dataset.kellyMult!);
@@ -1399,7 +1412,9 @@ import '../styles/global.css';
       const width = chartKellyEl.clientWidth || 600;
       const p = parseInt(simPSlider.value) / 1000;
       const b = sliderToSimB(parseInt(simBSlider.value));
-      const kelly = Math.abs(kellyFraction(p, b));
+      const kfRaw = kellyFraction(p, b);
+      const isNegativeEdge = kfRaw <= 0;
+      const kelly = Math.abs(kfRaw);
 
       const data: { mult: number; growth: number; pos: number; neg: number }[] = [];
       for (let m = 0; m <= 2.5; m += 0.005) {
@@ -1419,28 +1434,40 @@ import '../styles/global.css';
         });
       }
 
-      const peakGrowth = kelly > 0 ? growthRate(kelly, p, b) : 0;
-      const peakMarks = kelly > 0 ? [
-        Plot.dot([{ x: 1, y: peakGrowth }], {
-          x: "x", y: "y", fill: "#a8252c", r: 4,
-        }),
-        Plot.text([{ x: 1, y: peakGrowth }], {
-          x: "x", y: "y", text: ["Full Kelly"],
-          dy: -14, fill: "#a8252c", fontSize: 12, fontWeight: "600",
-        }),
-      ] : [];
-
-      // £ amount labels for x-axis ticks
       const tickMults = [0, 0.5, 1, 1.5, 2, 2.5];
-      const amountLabels = tickMults.map(m => ({
-        mult: m,
-        label: formatCurrency(Math.round(kelly * m * simBankroll)),
-      }));
+
+      // Conditional marks for positive-edge scenarios only
+      const positiveEdgeMarks: any[] = [];
+      if (!isNegativeEdge) {
+        const peakGrowth = growthRate(kelly, p, b);
+        positiveEdgeMarks.push(
+          Plot.dot([{ x: 1, y: peakGrowth }], { x: "x", y: "y", fill: "#a8252c", r: 4 }),
+          Plot.text([{ x: 1, y: peakGrowth }], { x: "x", y: "y", text: ["Full Kelly"], dy: -14, fill: "#a8252c", fontSize: 12, fontWeight: "600" }),
+          Plot.ruleX([simKellyMult], { stroke: "#a8252c", strokeWidth: 1.5, strokeDasharray: "4,3" }),
+        );
+        // £ amount labels
+        positiveEdgeMarks.push(Plot.text(tickMults.map(m => ({
+          mult: m,
+          label: formatCurrency(Math.round(kelly * m * simBankroll)),
+        })), {
+          x: "mult", y: null, text: "label",
+          frameAnchor: "bottom", dy: 38, fontSize: 10, fontWeight: "600",
+          fontFamily: '"JetBrains Mono", monospace', fill: "#1a1a1a",
+        }));
+      } else {
+        // Negative-edge annotation
+        const yMid = (Math.min(...data.map(d => d.growth)) + 0) / 2;
+        positiveEdgeMarks.push(Plot.text([{ x: 1.25, y: yMid }], {
+          x: "x", y: "y",
+          text: ["Kelly says don't play.\nEvery bet size shrinks your bankroll."],
+          fontSize: 13, fontStyle: "italic", fill: "#1a1a1a", lineWidth: 20,
+        }));
+      }
 
       const chart = Plot.plot({
         width,
         height: 240,
-        marginBottom: 52,
+        marginBottom: isNegativeEdge ? 30 : 52,
         style: {
           fontFamily: '"EB Garamond", Georgia, serif',
           fontSize: '13px',
@@ -1459,20 +1486,7 @@ import '../styles/global.css';
           Plot.areaY(data, { x: "mult", y: "neg", fill: "#6b7f5e", fillOpacity: 0.08, curve: "natural" }),
           Plot.ruleY([0], { stroke: "#1a1a1a", strokeOpacity: 0.15 }),
           Plot.lineY(data, { x: "mult", y: "growth", stroke: "#1a1a1a", strokeWidth: 2, curve: "natural" }),
-          Plot.ruleX([simKellyMult], { stroke: "#a8252c", strokeWidth: 1.5, strokeDasharray: "4,3" }),
-          ...peakMarks,
-          // £ amounts as secondary x-axis labels
-          Plot.text(amountLabels, {
-            x: "mult",
-            y: null,
-            text: "label",
-            frameAnchor: "bottom",
-            dy: 38,
-            fontSize: 10,
-            fontWeight: "600",
-            fontFamily: '"JetBrains Mono", monospace',
-            fill: "#1a1a1a",
-          }),
+          ...positiveEdgeMarks,
         ],
       });
 
