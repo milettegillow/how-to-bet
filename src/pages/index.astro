@@ -1,0 +1,206 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/global.css';
+
+const sections = [
+  { num: 2, id: 'edge', title: 'Building intuition: edge' },
+  { num: 3, id: 'simulator', title: 'The main event: the simulator' },
+  { num: 4, id: 'kelly', title: 'Full Kelly vs half Kelly' },
+  { num: 5, id: 'ruin', title: 'The warning: Gambler\'s Ruin' },
+  { num: 6, id: 'beyond', title: 'Beyond the casino' },
+];
+---
+
+<Base title="How to bet (and win)">
+  <main class="px-4 sm:px-6">
+    {/* ─── Header ─── */}
+    <header class="max-w-prose mx-auto pt-20 pb-16 sm:pt-28 sm:pb-20">
+      <h1 class="text-ink">How to bet (and win)</h1>
+      <p class="mt-3 text-ink/60 italic" style="font-size: 1.05rem;">
+        An interactive explainer on the Kelly Criterion and gambler's ruin.
+      </p>
+    </header>
+
+    {/* ─── Section 1: The opening question ─── */}
+    <section id="opening" class="max-w-prose mx-auto pb-20">
+      <div class="flex items-start gap-4 mb-8">
+        <div class="section-chip hidden sm:inline-flex mt-1">1</div>
+        <h2 class="mt-0" style="margin-top: 0;">
+          <span class="section-chip inline-flex sm:hidden mr-2 align-middle" style="width: 28px; height: 28px; font-size: 0.85rem;">1</span>
+          The opening question
+        </h2>
+      </div>
+
+      <p class="text-body leading-relaxed">
+        A coin pays even money<span
+          class="tooltip-trigger"
+          role="button"
+          tabindex="0"
+          aria-describedby="tooltip-even-money"
+        >?<span class="tooltip-content" id="tooltip-even-money" role="tooltip"
+          >If you bet £1 and win, you get £1 profit (plus your £1 back). If you lose, you're out £1.</span
+        ></span> and lands heads 55% of the time. You have £1,000 in your account. How much do you bet?
+      </p>
+
+      {/* Slider + Button */}
+      <div class="mt-10 mb-6" id="bet-controls">
+        <label for="bet-slider" class="block mb-3 font-medium">Your bet</label>
+        <input
+          type="range"
+          id="bet-slider"
+          min="0"
+          max="1000"
+          step="10"
+          value="0"
+          aria-valuemin="0"
+          aria-valuemax="1000"
+          aria-valuenow="0"
+          aria-valuetext="£0"
+        />
+        <div class="mt-3 text-center">
+          <span class="font-mono text-lg" id="bet-readout">£0</span>
+        </div>
+      </div>
+
+      <div class="text-center mt-8" id="bet-button-container">
+        <button
+          type="button"
+          id="lock-bet"
+          class="bg-card-red text-paper font-serif px-8 py-3 text-lg font-medium hover:opacity-90 transition-opacity"
+          style="border-radius: 2px;"
+        >
+          Lock in my bet
+        </button>
+      </div>
+
+      {/* Response panel */}
+      <div class="response-panel mt-10" id="response-panel" aria-live="polite">
+        <div class="border-l-2 border-card-red pl-5 py-2">
+          <p id="response-text" class="mb-4"></p>
+          <a
+            href="#edge"
+            class="text-sm text-gold no-underline hover:underline"
+            style="text-decoration: none;"
+            id="scroll-link"
+          >scroll to see why ↓</a>
+        </div>
+      </div>
+    </section>
+
+    {/* ─── Stub sections 2–6 ─── */}
+    {sections.map((s) => (
+      <section id={s.id} class="max-w-prose mx-auto py-20 border-t border-ink/10">
+        <div class="flex items-start gap-4 mb-8">
+          <div class="section-chip hidden sm:inline-flex mt-1">{s.num}</div>
+          <h2 class="mt-0" style="margin-top: 0;">
+            <span
+              class="section-chip inline-flex sm:hidden mr-2 align-middle"
+              style="width: 28px; height: 28px; font-size: 0.85rem;"
+            >{s.num}</span>
+            {s.title}
+          </h2>
+        </div>
+        <p class="text-ink/40 italic">Coming soon.</p>
+      </section>
+    ))}
+
+    {/* ─── Footer ─── */}
+    <footer class="max-w-prose mx-auto py-12 border-t border-ink/10 text-center text-sm text-ink/40">
+      <p>♠ ♥ ♦ ♣</p>
+    </footer>
+  </main>
+
+  <script>
+    const slider = document.getElementById('bet-slider') as HTMLInputElement;
+    const readout = document.getElementById('bet-readout')!;
+    const lockBtn = document.getElementById('lock-bet') as HTMLButtonElement;
+    const btnContainer = document.getElementById('bet-button-container')!;
+    const responsePanel = document.getElementById('response-panel')!;
+    const responseText = document.getElementById('response-text')!;
+
+    // Update readout as slider moves
+    slider.addEventListener('input', () => {
+      const val = slider.value;
+      readout.textContent = `£${val}`;
+      slider.setAttribute('aria-valuenow', val);
+      slider.setAttribute('aria-valuetext', `£${val}`);
+    });
+
+    // Tooltip tap-to-toggle on touch devices
+    document.querySelectorAll('.tooltip-trigger').forEach((trigger) => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        trigger.classList.toggle('is-active');
+      });
+
+      trigger.addEventListener('keydown', (e) => {
+        if ((e as KeyboardEvent).key === 'Enter' || (e as KeyboardEvent).key === ' ') {
+          e.preventDefault();
+          trigger.classList.toggle('is-active');
+        }
+      });
+    });
+
+    // Close tooltips when clicking elsewhere
+    document.addEventListener('click', (e) => {
+      if (!(e.target as Element).closest('.tooltip-trigger')) {
+        document.querySelectorAll('.tooltip-trigger.is-active').forEach((t) => {
+          t.classList.remove('is-active');
+        });
+      }
+    });
+
+    // Lock in bet
+    lockBtn.addEventListener('click', () => {
+      const x = parseInt(slider.value, 10);
+
+      // Disable slider
+      slider.disabled = true;
+
+      // Replace button with "Change my answer" link
+      btnContainer.innerHTML =
+        '<a href="#" id="change-answer" class="text-sm text-ink/40 hover:text-ink/60" style="text-decoration: none; font-style: italic;">Change my answer</a>';
+
+      document.getElementById('change-answer')!.addEventListener('click', (e) => {
+        e.preventDefault();
+        slider.disabled = false;
+        responsePanel.classList.remove('is-visible');
+        btnContainer.innerHTML = '';
+        btnContainer.appendChild(lockBtn);
+      });
+
+      // Build response
+      const kellyLink =
+        '<a href="https://en.wikipedia.org/wiki/Kelly_criterion" target="_blank" rel="noopener noreferrer" class="text-gold">Kelly Criterion</a>';
+
+      let msg: string;
+
+      if (x === 0) {
+        msg = `Safe — but you're leaving money on the table. At a 55% win rate, the maths says you should be betting. You picked £0; the optimal bet is £100.`;
+      } else if (x > 0 && x < 50) {
+        msg = `Cautious. You picked £${x}. The mathematically optimal bet is £100 — 10% of your bankroll. You're on the right side of the line, but under-betting your edge.`;
+      } else if (x >= 50 && x <= 150 && x !== 100) {
+        msg = `Close. You picked £${x}. The mathematically optimal bet is £100 — 10% of your bankroll. You've clearly got the intuition; keep reading to see where the exact number comes from.`;
+      } else if (x === 100) {
+        msg = `Spot on. You picked £100 — exactly 10% of your bankroll. You've just rediscovered the ${kellyLink}, the mathematically optimal bet for a 55/45 coin paying even money. Keep reading to see why.`;
+      } else if (x > 150 && x <= 500) {
+        msg = `Bold. You picked £${x}. The mathematically optimal bet is £100. Betting at this level, even with a positive edge, dramatically increases your chance of going broke before the edge compounds. Keep reading to see why.`;
+      } else {
+        msg = `Too bold. You picked £${x}. With this bet size, even a 55/45 edge mathematically guarantees ruin given enough rounds. The optimal bet is £100 — 10% of your bankroll. Keep reading to see why.`;
+      }
+
+      responseText.innerHTML = msg;
+
+      // Show response
+      requestAnimationFrame(() => {
+        responsePanel.classList.add('is-visible');
+      });
+    });
+
+    // Smooth scroll for the "scroll to see why" link
+    document.getElementById('scroll-link')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('edge')?.scrollIntoView({ behavior: 'smooth' });
+    });
+  </script>
+</Base>
