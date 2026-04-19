@@ -3,11 +3,7 @@ import Base from '../layouts/Base.astro';
 import Tooltip from '../components/Tooltip.astro';
 import '../styles/global.css';
 
-const sections = [
-  { num: 4, id: 'kelly', title: 'Full Kelly vs half Kelly' },
-  { num: 5, id: 'ruin', title: 'The warning: Gambler\'s Ruin' },
-  { num: 6, id: 'beyond', title: 'Beyond the casino' },
-];
+
 ---
 
 <Base title="How to bet (and win)">
@@ -410,7 +406,7 @@ const sections = [
           <div class="readout-caption">mean can be misleading when the distribution is skewed; look at median too</div>
         </div>
         <div class="readout-card readout-card-hero">
-          <div class="readout-label">Median final wealth <Tooltip text="The median is the middle outcome - half of simulated paths ended above this number, half below. We lead with median because it's what you'd actually experience: run this bet a thousand times and half your lives end up here or worse. The mean is pulled upward by a few lucky paths that got rich early and compounded, so it can look great even when most outcomes are dismal. When median and mean diverge sharply, the distribution is skewed - and median tells the truer story." id="tt-median" /></div>
+          <div class="readout-label">Median final wealth <Tooltip text="The median is the middle outcome - half of simulated paths ended above this number, half below. We lead with median because it's what you'd actually experience: run this bet a thousand times and half your lives end up here or worse. The mean is pulled upward by a few lucky paths that got rich early and compounded, so it can look great even when most outcomes are dismal. When median and mean diverge sharply, the distribution is skewed." id="tt-median" /></div>
           <output class="readout-value block text-card-red font-bold" id="stat-median">-</output>
         </div>
       </div>
@@ -427,23 +423,242 @@ const sections = [
       </div>
     </section>
 
-    {/* ─── Stub sections 4–6 ─── */}
-    {sections.map((s) => (
-      <section id={s.id} class="max-w-prose mx-auto py-20 border-t border-ink/10">
-        <div class="flex items-start gap-4 mb-8">
-          <img src={`/chip-${s.num}.png`} alt="" width="48" height="48" loading="lazy" class="section-chip-img hidden sm:block" />
-          <h2 class="mt-0" style="margin-top: 0;">
-            <img src={`/chip-${s.num}.png`} alt="" width="32" height="32" loading="lazy" class="section-chip-img inline sm:hidden mr-2 align-middle" />
-            {s.title}
-          </h2>
+    {/* ─── Section 4: Full Kelly vs Half Kelly ─── */}
+    <section id="kelly" class="max-w-prose mx-auto py-20 border-t border-ink/10">
+      <div class="flex items-start gap-4 mb-8">
+        <img src="/chip-4.png" alt="" width="48" height="48" loading="lazy" class="section-chip-img hidden sm:block" />
+        <h2 class="mt-0" style="margin-top: 0;">
+          <img src="/chip-4.png" alt="" width="32" height="32" loading="lazy" class="section-chip-img inline sm:hidden mr-2 align-middle" />
+          Full Kelly vs Half Kelly
+        </h2>
+      </div>
+
+      {/* Part 1: Opening prose */}
+      <p>Every Kelly calculation depends on two numbers: the probability you win, and how much you win if you do. The simulator takes these as given. Real life doesn't.</p>
+
+      <p>In practice, your edge is an estimate. A card counter thinks the count is favourable, but how favourable exactly? A pre-seed VC thinks 10% of investments will return 20×, but maybe it's 8%, or 13%. A sharp sports gambler thinks they're hitting 54%, but the true rate won't be revealed for thousands of bets. Every real-world Kelly calculation rests on numbers that are slightly off.</p>
+
+      <p>This wouldn't matter if Kelly were symmetric around its peak. It isn't. Betting 20% less than optimal barely dents your long-run growth rate. Betting 20% more can push you into negative territory, where every additional round erodes your bankroll. The punishment for overshooting is much worse than the reward for hitting the mark.</p>
+
+      <p>The chart below shows what happens to your growth rate if your edge estimate is wrong. Move the slider to vary how far off your estimate is, and watch where full Kelly lands compared to half Kelly.</p>
+
+      {/* Part 2: Slider + Chart + Readouts */}
+      <div class="mt-10">
+        <div class="sim-control-group">
+          <label for="s4-error-slider">Your edge estimate is off by: <Tooltip text="Your estimated edge, as a percentage of your true edge. If you think you'll win 55% of the time but you actually win 52%, your edge estimate is too high - that's a positive error. If you think you'll win 51% but actually win 55%, your estimate is too low - that's a negative error. Real professionals are almost always a bit over-confident, which is why this chart's right half matters more." id="tt-edge-error" /></label>
+          <input type="range" id="s4-error-slider" min="-50" max="50" step="1" value="0" />
+          <div class="mt-1 text-center">
+            <output for="s4-error-slider" class="font-mono text-sm" id="s4-error-readout">0% (spot on)</output>
+          </div>
         </div>
-        <p class="text-ink/40 italic">Coming soon.</p>
-      </section>
-    ))}
+      </div>
+
+      <figure class="mt-8 mb-6">
+        <div id="chart-s4-error" class="sim-chart-container" role="img" aria-label="Growth rate when edge estimate is wrong, comparing Full Kelly vs Half Kelly"></div>
+        <figcaption>Figure 3 - Long-run growth rate when the gambler's edge estimate is wrong. Half Kelly stays positive across a much wider error range.</figcaption>
+      </figure>
+
+      <div class="readout-grid" style="grid-template-columns: 1fr 1fr 1fr;" id="s4-stats">
+        <div class="readout-card">
+          <div class="readout-label">Full Kelly growth rate</div>
+          <output class="readout-value block" id="s4-full-rate" style="font-size: 1.1rem;">-</output>
+        </div>
+        <div class="readout-card">
+          <div class="readout-label">Half Kelly growth rate</div>
+          <output class="readout-value block" id="s4-half-rate" style="font-size: 1.1rem;">-</output>
+        </div>
+        <div class="readout-card">
+          <div class="readout-label">Comparison</div>
+          <output class="readout-value block" id="s4-ratio" style="font-size: 1.1rem;">-</output>
+        </div>
+      </div>
+
+      {/* Part 3: Closing prose */}
+      <div class="mt-12">
+        <p>Notice the asymmetry. When your edge estimate is spot on, full Kelly beats half Kelly by roughly 25%. When you're 20% over-confident - a realistic amount - full Kelly gives back almost all of that advantage, and it keeps falling from there. Half Kelly's curve is much flatter: it rewards you when you're right, and it barely punishes you when you're wrong.</p>
+
+        <p>This is the case for half Kelly. You sacrifice a quarter of your theoretical growth rate in exchange for a simulation that doesn't explode when your inputs are slightly off. Given that your inputs are always slightly off, this is a trade professionals make without thinking.</p>
+
+        <p>Everything so far has assumed you had an edge in the first place. The next section is about what happens when you don't.</p>
+      </div>
+
+      <div class="text-center mt-6">
+        <a href="#ruin" class="text-sm text-gold" style="text-decoration: none;" id="scroll-to-s5">scroll to see why ↓</a>
+      </div>
+    </section>
+
+    {/* ─── Section 5: The warning - Gambler's Ruin ─── */}
+    <section id="ruin" class="max-w-prose mx-auto py-20 border-t border-ink/10">
+      <div class="flex items-start gap-4 mb-8">
+        <img src="/chip-5.png" alt="" width="48" height="48" loading="lazy" class="section-chip-img hidden sm:block" />
+        <h2 class="mt-0" style="margin-top: 0;">
+          <img src="/chip-5.png" alt="" width="32" height="32" loading="lazy" class="section-chip-img inline sm:hidden mr-2 align-middle" />
+          The warning: Gambler's Ruin
+        </h2>
+      </div>
+
+      {/* Part 1: The mirror question */}
+      <p class="text-body leading-relaxed">
+        A coin pays even money<Tooltip text="If you bet £1 and win, you get £1 profit (plus your £1 back). If you lose, you're out £1." id="tt-even-money-s5" /> and lands heads 50% of the time. You have £1,000 in your account. How much do you bet?
+      </p>
+
+      <div class="mt-10 mb-6" id="s5-bet-controls">
+        <label for="s5-bet-slider" class="block mb-3 font-medium">Your bet</label>
+        <input type="range" id="s5-bet-slider" min="0" max="1000" step="10" value="0"
+          aria-valuemin="0" aria-valuemax="1000" aria-valuenow="0" aria-valuetext="£0" />
+        <div class="mt-3 text-center">
+          <span class="font-mono text-lg" id="s5-bet-readout">£0</span>
+        </div>
+      </div>
+
+      <div class="text-center mt-8" id="s5-button-container">
+        <button type="button" id="s5-lock-bet" class="btn-primary">Lock in my bet</button>
+      </div>
+
+      {/* Response panel */}
+      <div class="response-panel mt-10" id="s5-response-panel" aria-live="polite">
+        <div class="border-l-2 border-card-red pl-5 py-2">
+          <p id="s5-response-text" class="mb-4"></p>
+          <a href="#s5-simulator" class="text-sm text-gold" style="text-decoration: none;" id="s5-scroll-sim">↓ run the simulator</a>
+        </div>
+      </div>
+
+      {/* Nudge paragraph */}
+      <div class="mt-12" id="s5-nudge" style="display: none;">
+        <p>The simulator below plays out a game over and over. You pick a bet size, the simulator flips the coin thousands of times for each simulated lifetime, and shows you how often you hit your target versus how often you go broke. Try it first with a fair coin (p=0.5), then try nudging the odds slightly against you - to 0.49, say. Watch what happens.</p>
+      </div>
+
+      {/* Part 3: Gambler's ruin simulator */}
+      <div class="mt-10" id="s5-simulator">
+        <h3 class="text-lg font-semibold mb-6">Gambler's Ruin Simulator</h3>
+
+        <div class="sim-control-group">
+          <label>Starting bankroll</label>
+          <div class="paths-btn-group">
+            <button type="button" class="paths-btn is-active" data-s5-bankroll="1000">£1k</button>
+            <button type="button" class="paths-btn" data-s5-bankroll="10000">£10k</button>
+            <button type="button" class="paths-btn" data-s5-bankroll="100000">£100k</button>
+          </div>
+        </div>
+
+        <div class="sim-control-group">
+          <label>Target bankroll</label>
+          <div class="paths-btn-group">
+            <button type="button" class="paths-btn is-active" data-s5-target="2">2× starting</button>
+            <button type="button" class="paths-btn" data-s5-target="5">5× starting</button>
+            <button type="button" class="paths-btn" data-s5-target="10">10× starting</button>
+          </div>
+          <div class="mt-1 text-center font-mono text-sm text-ink/50" id="s5-target-readout">= £2,000</div>
+        </div>
+
+        <div class="sim-control-group">
+          <label for="s5-p-slider">Win probability (<em>p</em>)</label>
+          <input type="range" id="s5-p-slider" min="1" max="999" step="1" value="500" />
+          <div class="mt-1 text-center">
+            <output for="s5-p-slider" class="font-mono text-sm" id="s5-p-readout">50.0%</output>
+          </div>
+        </div>
+
+        <div class="sim-control-group">
+          <label for="s5-bet-size-slider">Flat bet size (£)</label>
+          <input type="range" id="s5-bet-size-slider" min="1" max="500" step="1" value="10" />
+          <div class="mt-1 text-center">
+            <output for="s5-bet-size-slider" class="font-mono text-sm" id="s5-betsize-readout">£10</output>
+          </div>
+        </div>
+
+        <div class="mt-6 mb-1 text-center">
+          <button type="button" id="s5-run" class="btn-primary" style="font-size: 0.95rem; padding: 0.6rem 2.5rem;">Run simulation</button>
+        </div>
+
+        {/* Chart placeholder */}
+        <figure class="mt-8 mb-6">
+          <div id="s5-chart" class="sim-chart-container" role="img" aria-label="Gambler's ruin outcomes chart">
+            <div class="sim-chart-placeholder"><span class="text-card-red" style="font-size: 1.4rem; display: block; margin-bottom: 0.4rem;">♠</span><span style="font-variant: small-caps; font-style: italic;">Run the simulation to see the outcomes</span></div>
+          </div>
+          <figcaption>Figure 4 - Outcomes of 1,000 simulated paths. With zero edge and finite money, ruin is the expected destination.</figcaption>
+        </figure>
+
+        {/* Stats (hidden until first run) */}
+        <div class="readout-grid" id="s5-stats" style="display: none; grid-template-columns: 1fr 1fr 1fr;">
+          <div class="readout-card">
+            <div class="readout-label">Hit target</div>
+            <output class="readout-value block" id="s5-stat-target" style="font-size: 1.1rem;">-</output>
+          </div>
+          <div class="readout-card">
+            <div class="readout-label">Hit ruin</div>
+            <output class="readout-value block" id="s5-stat-ruin" style="font-size: 1.1rem;">-</output>
+          </div>
+          <div class="readout-card">
+            <div class="readout-label">Analytic ruin probability</div>
+            <output class="readout-value block" id="s5-stat-analytic" style="font-size: 1.1rem;">-</output>
+            <div class="readout-caption">the mathematical prediction - compare it to the simulation result</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Part 4: Transition */}
+      <div class="mt-12">
+        <p>This is what a casino is, mathematically. A small negative edge, repeated until you run out of money. The house doesn't need to beat you on any single round - it just needs to stay in the game longer than you can.</p>
+
+        <div class="text-center mt-6">
+          <a href="#beyond" class="text-sm text-gold" style="text-decoration: none;" id="scroll-to-s6">scroll to the conclusion ↓</a>
+        </div>
+      </div>
+    </section>
+
+    {/* ─── Section 6: Beyond the casino ─── */}
+    <section id="beyond" class="max-w-prose mx-auto py-20 border-t border-ink/10">
+      <div class="flex items-start gap-4 mb-8">
+        <img src="/chip-6.png" alt="" width="48" height="48" loading="lazy" class="section-chip-img hidden sm:block" />
+        <h2 class="mt-0" style="margin-top: 0;">
+          <img src="/chip-6.png" alt="" width="32" height="32" loading="lazy" class="section-chip-img inline sm:hidden mr-2 align-middle" />
+          Beyond the casino
+        </h2>
+      </div>
+
+      {/* Part 1: Summary */}
+      <p>Three sentences, if you remember nothing else:</p>
+
+      <blockquote class="my-8 px-6 py-4 border-l-3 border-card-red" style="font-size: 1.15rem; line-height: 1.55; border-left: 3px solid #a8252c;">
+        Only bet when you have an edge. That edge can come from either side of the equation - better-than-fair odds, or better-than-fair payout for the odds you face. And even with a real edge, bet less than you think: half of what the maths says is about right.
+      </blockquote>
+
+      {/* Part 2: Three card blocks */}
+      <div class="mt-12" style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+        <div class="readout-card" style="padding: 1.5rem;">
+          <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">♠</div>
+          <h3 class="text-base font-semibold mb-2" style="margin-top: 0;">Why fund managers diversify</h3>
+          <p style="font-size: 0.9rem; margin-bottom: 0;">A pre-seed VC with genuine edge faces a Kelly fraction of around 5%. Most partners physically can't deploy 5% per cheque - their LPs demand 30+ portfolio companies, which forces each position down to 2-3%. What looks like caution is really half-Kelly dressed up as diversification policy. Kelly explains the shape of venture portfolio construction in one number.</p>
+        </div>
+        <div class="readout-card" style="padding: 1.5rem;">
+          <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">♥</div>
+          <h3 class="text-base font-semibold mb-2" style="margin-top: 0;">Why one life isn't 500 lives</h3>
+          <p style="font-size: 0.9rem; margin-bottom: 0;">The mean final wealth across 500 parallel simulations can look great even if almost every individual simulation ended in ruin. That's because the mean is dominated by a few lucky paths. You don't get to live the average; you live one path. This is called ergodicity economics, and it's the deepest argument for betting sub-Kelly.</p>
+        </div>
+        <div class="readout-card" style="padding: 1.5rem;">
+          <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">♦</div>
+          <h3 class="text-base font-semibold mb-2" style="margin-top: 0;">This isn't only about gambling</h3>
+          <p style="font-size: 0.9rem; margin-bottom: 0;">Kelly shows up wherever compounding and uncertainty meet. Portfolio sizing. Business reinvestment. AI compute budgets. Whether to build out capacity before you know demand. Any repeated decision with positive expected value and variance is, secretly, a Kelly problem. The maths never stops being relevant - it just changes costume.</p>
+        </div>
+      </div>
+
+      {/* Part 3: Further reading */}
+      <div class="mt-12">
+        <h3 class="text-base font-semibold mb-4" style="margin-top: 0;">Further reading</h3>
+        <ul class="suit-list">
+          <li>Kelly's original 1956 paper: <a href="https://www.herrold.com/brokerage/kelly.pdf" target="_blank" rel="noopener noreferrer">"A New Interpretation of Information Rate"</a></li>
+          <li>William Poundstone, <em>Fortune's Formula</em> - the popular book on Kelly, Shannon, Thorp, and the MIT blackjack team</li>
+          <li>Ed Thorp, <em>A Man for All Markets</em> - the autobiography of the man who applied Kelly to beat both blackjack and the stock market</li>
+          <li>Ole Peters, <a href="https://www.nature.com/articles/s41567-019-0732-0" target="_blank" rel="noopener noreferrer"><em>The ergodicity problem in economics</em></a> - the deeper mathematical case for half-Kelly and sub-Kelly strategies</li>
+        </ul>
+      </div>
+    </section>
 
     {/* ─── Footer ─── */}
     <footer class="max-w-prose mx-auto py-12 border-t border-ink/10 text-center text-sm text-ink/40">
-      <p>♠ ♥ ♦ ♣</p>
+      <p class="italic mb-2">Built by Milette Gillow. Week 15 of my 2026 weekly coding project. <a href="https://milettegillow.com" target="_blank" rel="noopener noreferrer" class="text-gold">milettegillow.com →</a></p>
+      <p style="font-size: 0.75rem; color: rgba(26,26,26,0.3);"><a href="https://github.com/milettegillow/how-to-bet" target="_blank" rel="noopener noreferrer" style="color: inherit;">Source code on GitHub.</a></p>
     </footer>
   </main>
 
@@ -1413,5 +1628,416 @@ const sections = [
     // Initial render
     renderKellyCurve();
     updateKellyDisplay();
+
+    // ─── Expose p/b for Section 4 ───
+    (window as any).__s3GetPB = () => ({
+      p: parseInt(simPSlider.value) / 1000,
+      b: sliderToSimB(parseInt(simBSlider.value)),
+    });
+  </script>
+
+  <script>
+    // ─── Section 4: Full Kelly vs Half Kelly ───
+    import * as Plot from "@observablehq/plot";
+
+    const s4ErrorSlider = document.getElementById('s4-error-slider') as HTMLInputElement;
+    const s4ErrorReadout = document.getElementById('s4-error-readout')!;
+    const chartS4El = document.getElementById('chart-s4-error')!;
+    const s4FullRate = document.getElementById('s4-full-rate')!;
+    const s4HalfRate = document.getElementById('s4-half-rate')!;
+    const s4Ratio = document.getElementById('s4-ratio')!;
+
+    // Get p and b from Section 3's current state, or default to biased coin
+    function getS4PB(): { p: number; b: number } {
+      const getter = (window as any).__s3GetPB;
+      if (getter) return getter();
+      return { p: 0.55, b: 1 };
+    }
+
+    function computeGrowth(fBet: number, pTrue: number, b: number): number {
+      if (fBet <= 0) return 0;
+      if (fBet >= 1) fBet = 0.999;
+      const qTrue = 1 - pTrue;
+      return pTrue * Math.log(1 + fBet * b) + qTrue * Math.log(1 - fBet);
+    }
+
+    function formatGrowthPct(g: number): string {
+      const pct = (g * 100);
+      const sign = pct >= 0 ? '+' : '';
+      return sign + pct.toFixed(3) + '%';
+    }
+
+    function renderS4Chart(): void {
+      const { p, b } = getS4PB();
+      const edgeTrue = b * p - (1 - p);
+      const currentError = parseInt(s4ErrorSlider.value) / 100;
+
+      const data: { error: number; full: number; half: number }[] = [];
+
+      for (let ePct = -50; ePct <= 50; ePct++) {
+        const e = ePct / 100;
+        const edgeEst = edgeTrue * (1 + e);
+        let fEst = edgeEst > 0 ? edgeEst / b : 0;
+        if (fEst > 1) fEst = 1;
+
+        const gFull = computeGrowth(fEst, p, b);
+        const gHalf = computeGrowth(fEst / 2, p, b);
+
+        data.push({ error: ePct, full: gFull, half: gHalf });
+      }
+
+      // Separate negative-growth shading for Full Kelly
+      const negData = data.filter(d => d.full < 0).map(d => ({ error: d.error, neg: d.full }));
+
+      const width = chartS4El.clientWidth || 600;
+
+      const chart = Plot.plot({
+        width,
+        height: 280,
+        style: {
+          fontFamily: '"EB Garamond", Georgia, serif',
+          fontSize: '13px',
+          background: 'transparent',
+        },
+        x: { label: "Edge estimate error (%)", domain: [-50, 50], ticks: [- 50, -25, 0, 25, 50], tickFormat: (d: number) => (d > 0 ? '+' : '') + d + '%' },
+        y: { label: "↑ Growth rate (per bet)", grid: true },
+        marks: [
+          Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
+          Plot.ruleY([0], { stroke: "#1a1a1a", strokeOpacity: 0.15 }),
+          // Shade negative Full Kelly region
+          ...(negData.length > 0 ? [Plot.areaY(negData, { x: "error", y: "neg", fill: "#6b7f5e", fillOpacity: 0.1, curve: "natural" })] : []),
+          // Full Kelly curve
+          Plot.lineY(data, { x: "error", y: "full", stroke: "#a8252c", strokeWidth: 2.5, curve: "natural" }),
+          // Half Kelly curve
+          Plot.lineY(data, { x: "error", y: "half", stroke: "#1a1a1a", strokeWidth: 2, curve: "natural" }),
+          // Vertical marker at current slider position
+          Plot.ruleX([currentError * 100], { stroke: "#a8252c", strokeWidth: 1.5, strokeDasharray: "4,3" }),
+          // Labels
+          Plot.text([{ x: -35, y: computeGrowth(Math.max(0, edgeTrue * 0.65 / b), p, b) }], {
+            x: "x", y: "y", text: ["Full Kelly"], fill: "#a8252c", fontSize: 12, fontWeight: "600", dy: -10,
+          }),
+          Plot.text([{ x: -35, y: computeGrowth(Math.max(0, edgeTrue * 0.65 / b) / 2, p, b) }], {
+            x: "x", y: "y", text: ["Half Kelly"], fill: "#1a1a1a", fontSize: 12, fontWeight: "600", dy: -10,
+          }),
+        ],
+      });
+
+      chartS4El.innerHTML = '';
+      chartS4El.appendChild(chart);
+
+      // Update readouts at current slider position
+      updateS4Readouts();
+    }
+
+    function updateS4Readouts(): void {
+      const { p, b } = getS4PB();
+      const edgeTrue = b * p - (1 - p);
+      const e = parseInt(s4ErrorSlider.value) / 100;
+      const edgeEst = edgeTrue * (1 + e);
+      let fEst = edgeEst > 0 ? edgeEst / b : 0;
+      if (fEst > 1) fEst = 1;
+
+      const gFull = computeGrowth(fEst, p, b);
+      const gHalf = computeGrowth(fEst / 2, p, b);
+
+      s4FullRate.textContent = formatGrowthPct(gFull);
+      s4FullRate.style.color = gFull < 0 ? '#a8252c' : '';
+
+      s4HalfRate.textContent = formatGrowthPct(gHalf);
+      s4HalfRate.style.color = gHalf < 0 ? '#a8252c' : '';
+
+      if (gFull > 0 && gHalf > 0) {
+        const ratio = (gHalf / gFull * 100).toFixed(0);
+        s4Ratio.textContent = `Half captures ${ratio}% of Full Kelly's growth`;
+        s4Ratio.style.color = '';
+      } else if (gFull <= 0 && gHalf > 0) {
+        s4Ratio.textContent = "Full Kelly has gone negative - Half is still growing";
+        s4Ratio.style.color = '';
+      } else if (gFull <= 0 && gHalf <= 0) {
+        s4Ratio.textContent = "Both negative";
+        s4Ratio.style.color = '#a8252c';
+      } else {
+        const ratio = (gHalf / gFull * 100).toFixed(0);
+        s4Ratio.textContent = `Half captures ${ratio}% of Full Kelly's growth`;
+        s4Ratio.style.color = '';
+      }
+
+      // Update slider readout
+      const errVal = parseInt(s4ErrorSlider.value);
+      if (errVal === 0) {
+        s4ErrorReadout.textContent = '0% (spot on)';
+      } else {
+        s4ErrorReadout.textContent = (errVal > 0 ? '+' : '') + errVal + '%';
+      }
+    }
+
+    s4ErrorSlider.addEventListener('input', () => {
+      renderS4Chart();
+    });
+
+    // Scroll link
+    document.getElementById('scroll-to-s5')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('ruin')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // Listen for Section 3 scenario changes to update this chart
+    // (Scenarios change p/b which affects our curves)
+    document.querySelectorAll('[data-scenario]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Small delay to let Section 3 update its sliders first
+        setTimeout(renderS4Chart, 50);
+      });
+    });
+
+    // Also update when Section 3's p/b sliders change
+    document.getElementById('sim-p')?.addEventListener('input', () => setTimeout(renderS4Chart, 10));
+    document.getElementById('sim-b')?.addEventListener('input', () => setTimeout(renderS4Chart, 10));
+
+    // Initial render
+    renderS4Chart();
+  </script>
+
+  <script>
+    // ─── Section 5: Gambler's Ruin ───
+    import * as Plot from "@observablehq/plot";
+
+    // ─── Part 1: Mirror question ───
+
+    const s5Slider = document.getElementById('s5-bet-slider') as HTMLInputElement;
+    const s5Readout = document.getElementById('s5-bet-readout')!;
+    const s5LockBtn = document.getElementById('s5-lock-bet') as HTMLButtonElement;
+    const s5BtnContainer = document.getElementById('s5-button-container')!;
+    const s5ResponsePanel = document.getElementById('s5-response-panel')!;
+    const s5ResponseText = document.getElementById('s5-response-text')!;
+    const s5Nudge = document.getElementById('s5-nudge')!;
+
+    s5Slider.addEventListener('input', () => {
+      s5Readout.textContent = `£${s5Slider.value}`;
+      s5Slider.setAttribute('aria-valuenow', s5Slider.value);
+      s5Slider.setAttribute('aria-valuetext', `£${s5Slider.value}`);
+    });
+
+    s5LockBtn.addEventListener('click', () => {
+      const x = parseInt(s5Slider.value, 10);
+      s5Slider.disabled = true;
+
+      s5BtnContainer.innerHTML =
+        '<a href="#" id="s5-change-answer" class="text-sm text-ink/40 hover:text-ink/60" style="text-decoration: none; font-style: italic;">Change my answer</a>';
+
+      document.getElementById('s5-change-answer')!.addEventListener('click', (e) => {
+        e.preventDefault();
+        s5Slider.disabled = false;
+        s5ResponsePanel.classList.remove('is-visible');
+        s5Nudge.style.display = 'none';
+        s5BtnContainer.innerHTML = '';
+        s5BtnContainer.appendChild(s5LockBtn);
+      });
+
+      const ruinLink = '<a href="https://en.wikipedia.org/wiki/Gambler%27s_ruin" target="_blank" rel="noopener noreferrer" class="text-gold">ruin</a>';
+
+      let msg: string;
+      if (x === 0) {
+        msg = `Correct. With zero edge, every positive bet size leads to ${ruinLink} given enough time, assuming you have finite money. This is gambler's ruin - and the simulator below shows why. Kelly agrees: plug p=0.5 and b=1 into the formula and it returns exactly zero.`;
+      } else if (x <= 50) {
+        msg = `You picked £${x}. Wrong - but understandably so. A small bet feels safe, but with zero edge, any positive bet size leads to ${ruinLink} eventually if you have finite money. Kelly's answer here is £0. The simulator below shows why.`;
+      } else if (x <= 500) {
+        msg = `You picked £${x}. Wrong. With a fair coin paying even money, there is no bet size that leads to long-term gain. Every positive stake feeds the same fundamental problem: given finite money and enough time, you go broke. Kelly's answer here is £0. Play with the simulator below.`;
+      } else {
+        msg = `You picked £${x}. Wrong, and bold. On a fair coin, there is no bet size that works. The larger the bet, the faster the ${ruinLink}. Kelly's answer here is £0. The simulator below shows what happens at different bet sizes.`;
+      }
+
+      s5ResponseText.innerHTML = msg;
+
+      requestAnimationFrame(() => {
+        s5ResponsePanel.classList.add('is-visible');
+        s5Nudge.style.display = '';
+      });
+    });
+
+    document.getElementById('s5-scroll-sim')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('s5-simulator')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    // ─── Part 3: Ruin simulator ───
+
+    const s5RunBtn = document.getElementById('s5-run') as HTMLButtonElement;
+    const s5ChartEl = document.getElementById('s5-chart')!;
+    const s5StatsPanel = document.getElementById('s5-stats')!;
+    const s5StatTarget = document.getElementById('s5-stat-target')!;
+    const s5StatRuin = document.getElementById('s5-stat-ruin')!;
+    const s5StatAnalytic = document.getElementById('s5-stat-analytic')!;
+
+    const s5PSlider = document.getElementById('s5-p-slider') as HTMLInputElement;
+    const s5PReadout = document.getElementById('s5-p-readout')!;
+    const s5BetSizeSlider = document.getElementById('s5-bet-size-slider') as HTMLInputElement;
+    const s5BetSizeReadout = document.getElementById('s5-betsize-readout')!;
+    const s5TargetReadout = document.getElementById('s5-target-readout')!;
+
+    let s5Bankroll = 1000;
+    let s5TargetMult = 2;
+    const s5ReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Readout updaters
+    s5PSlider.addEventListener('input', () => {
+      s5PReadout.textContent = (parseInt(s5PSlider.value) / 10).toFixed(1) + '%';
+    });
+    s5BetSizeSlider.addEventListener('input', () => {
+      s5BetSizeReadout.textContent = '£' + s5BetSizeSlider.value;
+    });
+
+    function updateS5TargetReadout(): void {
+      const target = s5Bankroll * s5TargetMult;
+      s5TargetReadout.textContent = '= £' + target.toLocaleString('en-GB');
+    }
+
+    // Bankroll buttons
+    document.querySelectorAll<HTMLButtonElement>('[data-s5-bankroll]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-s5-bankroll]').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        s5Bankroll = parseInt(btn.dataset.s5Bankroll!);
+        updateS5TargetReadout();
+      });
+    });
+
+    // Target buttons
+    document.querySelectorAll<HTMLButtonElement>('[data-s5-target]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-s5-target]').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        s5TargetMult = parseInt(btn.dataset.s5Target!);
+        updateS5TargetReadout();
+      });
+    });
+
+    // Simulation
+    function runRuinSim(): { hitTarget: number; hitRuin: number; unresolved: number } {
+      const start = s5Bankroll;
+      const target = s5Bankroll * s5TargetMult;
+      const p = parseInt(s5PSlider.value) / 1000;
+      const bet = parseInt(s5BetSizeSlider.value);
+      const paths = 1000;
+      const maxRounds = 10000;
+
+      let hitTarget = 0;
+      let hitRuin = 0;
+      let unresolved = 0;
+
+      for (let i = 0; i < paths; i++) {
+        let bankroll = start;
+        let resolved = false;
+        for (let r = 0; r < maxRounds; r++) {
+          if (Math.random() < p) {
+            bankroll += bet;
+          } else {
+            bankroll -= bet;
+          }
+          if (bankroll >= target) { hitTarget++; resolved = true; break; }
+          if (bankroll <= 0) { hitRuin++; resolved = true; break; }
+        }
+        if (!resolved) unresolved++;
+      }
+
+      return { hitTarget, hitRuin, unresolved };
+    }
+
+    function analyticRuinProb(): number {
+      const start = s5Bankroll;
+      const target = s5Bankroll * s5TargetMult;
+      const p = parseInt(s5PSlider.value) / 1000;
+      const q = 1 - p;
+      const bet = parseInt(s5BetSizeSlider.value);
+      const n = Math.round(start / bet);
+      const m = Math.round(target / bet);
+
+      if (Math.abs(p - 0.5) < 0.0001) {
+        // Fair coin: ruin prob = 1 - n/m
+        return 1 - n / m;
+      }
+      const ratio = q / p;
+      return (1 - Math.pow(ratio, n)) / (1 - Math.pow(ratio, m));
+    }
+
+    async function doS5Run(): Promise<void> {
+      s5RunBtn.textContent = 'Running…';
+      s5RunBtn.disabled = true;
+
+      await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+      const result = runRuinSim();
+      const total = result.hitTarget + result.hitRuin + result.unresolved;
+
+      // Render bar chart
+      const chartData = [
+        { outcome: 'Hit target', count: result.hitTarget, pct: result.hitTarget / total * 100, color: '#1a1a1a' },
+        { outcome: 'Hit ruin', count: result.hitRuin, pct: result.hitRuin / total * 100, color: '#a8252c' },
+      ];
+      if (result.unresolved > 0) {
+        chartData.push({ outcome: 'Unresolved', count: result.unresolved, pct: result.unresolved / total * 100, color: 'rgba(26,26,26,0.25)' });
+      }
+
+      const width = s5ChartEl.clientWidth || 600;
+      const chart = Plot.plot({
+        width,
+        height: 200,
+        style: {
+          fontFamily: '"EB Garamond", Georgia, serif',
+          fontSize: '13px',
+          background: 'transparent',
+        },
+        x: { label: null, domain: chartData.map(d => d.outcome), padding: 0.3 },
+        y: { label: "Paths", domain: [0, 1000], grid: true, ticks: 5 },
+        color: { domain: chartData.map(d => d.outcome), range: chartData.map(d => d.color) },
+        marks: [
+          Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
+          Plot.barY(chartData, {
+            x: "outcome", y: "count", fill: "outcome",
+            tip: true,
+          }),
+          Plot.text(chartData, {
+            x: "outcome", y: "count",
+            text: (d: any) => d.pct.toFixed(1) + '%',
+            dy: -10, fontSize: 13, fontWeight: "600",
+          }),
+        ],
+      });
+
+      s5ChartEl.innerHTML = '';
+      s5ChartEl.appendChild(chart);
+
+      // Show stats
+      if (s5StatsPanel.style.display === 'none') {
+        s5StatsPanel.style.display = '';
+        if (!s5ReducedMotion) {
+          s5StatsPanel.style.opacity = '0';
+          s5StatsPanel.style.transition = 'opacity 200ms ease';
+          requestAnimationFrame(() => { s5StatsPanel.style.opacity = '1'; });
+        }
+      }
+
+      s5StatTarget.textContent = (result.hitTarget / total * 100).toFixed(1) + '%';
+      s5StatRuin.textContent = (result.hitRuin / total * 100).toFixed(1) + '%';
+      s5StatRuin.style.color = '#a8252c';
+
+      const aRuin = analyticRuinProb();
+      s5StatAnalytic.textContent = (aRuin * 100).toFixed(1) + '%';
+
+      setTimeout(() => {
+        s5RunBtn.textContent = 'Run simulation';
+        s5RunBtn.disabled = false;
+      }, 300);
+    }
+
+    s5RunBtn.addEventListener('click', doS5Run);
+
+    // Scroll link to Section 6
+    document.getElementById('scroll-to-s6')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.getElementById('beyond')?.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    updateS5TargetReadout();
   </script>
 </Base>
