@@ -1986,7 +1986,7 @@ import '../styles/global.css';
 
     const OUTCOME_COLORS: Record<string, string> = {
       ruin: '#a8252c',
-      target: '#3d6b4e',
+      target: '#2d7a3f',
       unresolved: '#666666',
     };
     const OUTCOME_OPACITY: Record<string, number> = {
@@ -2081,7 +2081,7 @@ import '../styles/global.css';
       }
       if (pctTarget > 0) {
         const seg = document.createElement('div');
-        seg.style.cssText = `width: ${pctTarget}%; background: #3d6b4e; color: #fafaf7; display: flex; align-items: center; justify-content: center;`;
+        seg.style.cssText = `width: ${pctTarget}%; background: #2d7a3f; color: #fafaf7; display: flex; align-items: center; justify-content: center;`;
         if (pctTarget > 8) seg.textContent = pctTarget.toFixed(1) + '%';
         bar.appendChild(seg);
       }

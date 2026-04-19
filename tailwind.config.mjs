@@ -8,7 +8,7 @@ export default {
       'card-red': '#a8252c',
       gold: '#b08d2c',
       ruin: '#6b7f5e',
-      success: '#3d6b4e',
+      success: '#2d7a3f',
       transparent: 'transparent',
       current: 'currentColor',
     },
