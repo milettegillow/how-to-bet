@@ -196,6 +196,17 @@ input[type="range"]:disabled::-moz-range-thumb {
   }
 }
 
+/* Reusable button style */
+.btn-primary {
+  @apply bg-card-red text-paper font-serif px-8 py-3 text-lg font-medium;
+  border-radius: 6px;
+  transition: opacity 0.15s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
 /* Card suit bullets */
 .suit-list {
   list-style: none;
