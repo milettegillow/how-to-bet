@@ -1,0 +1,18 @@
+---
+interface Props {
+  text: string;
+  position?: 'above' | 'below';
+  id?: string;
+}
+
+const { text, position = 'above', id } = Astro.props;
+const tooltipId = id || `tt-${Math.random().toString(36).slice(2, 8)}`;
+const posClass = position === 'below' ? 'tooltip-content-below' : 'tooltip-content';
+---
+
+<span
+  class="tooltip-trigger"
+  role="button"
+  tabindex="0"
+  aria-describedby={tooltipId}
+>?<span class={posClass} id={tooltipId} role="tooltip">{text}</span></span>

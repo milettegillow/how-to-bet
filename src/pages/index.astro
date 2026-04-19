@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import Tooltip from '../components/Tooltip.astro';
 import '../styles/global.css';
 
 const sections = [
@@ -284,46 +285,55 @@ const sections = [
         <label class="block mb-2 font-medium" style="font-size: 0.9rem;">Scenarios</label>
         <div class="scenario-grid" role="group" aria-label="Scenario presets">
           <button type="button" class="scenario-btn" data-scenario="fair-coin">
+            <Tooltip text="A fair coin paying even money. Zero edge. Kelly says don't play - you won't go broke any faster than you would at a casino, but you won't get anywhere either." position="below" id="tt-fair-coin" />
             <span class="scenario-icon">⚪</span>
             <span class="scenario-name">Fair Coin</span>
             <span class="scenario-sub">p=0.50, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="eu-roulette">
+            <Tooltip text="European roulette, betting red or black. The single green zero gives the house a 2.7% edge. Kelly returns a negative fraction - mathematically, the correct bet is not to play." position="below" id="tt-eu-roulette" />
             <span class="scenario-icon">🎡</span>
             <span class="scenario-name">EU Roulette</span>
             <span class="scenario-sub">p=0.4865, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="us-roulette">
+            <Tooltip text="American roulette, betting red or black. Two green zeros (0 and 00) give the house a 5.3% edge - nearly double European roulette, for the same game." position="below" id="tt-us-roulette" />
             <span class="scenario-icon">🎰</span>
             <span class="scenario-name">US Roulette</span>
             <span class="scenario-sub">p=0.4737, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="biased-coin">
+            <Tooltip text="The coin from the opening question. 55% win rate, paying even money. A small positive edge. Kelly: bet 10% of your bankroll each round." position="below" id="tt-biased-coin" />
             <span class="scenario-icon">🪙</span>
             <span class="scenario-name">Biased Coin</span>
             <span class="scenario-sub">p=0.55, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="card-counter">
+            <Tooltip text="A skilled blackjack card counter's edge when the count is favourable. Thin positive edge, tiny bets, long grind. This is what actual professional gambling looks like." position="below" id="tt-card-counter" />
             <span class="scenario-icon">🃏</span>
             <span class="scenario-name">Card Counter</span>
             <span class="scenario-sub">p=0.51, b=1.0</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="sports-gambler">
+            <Tooltip text="A winning sports bettor. Breaking even requires a 52.4% win rate because of the bookmaker's cut; sharps sustain 53-55%. Modelled here as a 54% win rate at -110 odds." position="below" id="tt-sports" />
             <span class="scenario-icon">🏈</span>
             <span class="scenario-name">Sharp Sports</span>
             <span class="scenario-sub">p=0.54, b=0.909</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="pre-seed-vc">
+            <Tooltip text="Writing £250k cheques into early-stage startups. Roughly 10% of investments return 20× or more; the rest go to zero. Large positive edge, enormous variance - why VCs diversify across 30+ portfolio companies." position="below" id="tt-pre-seed" />
             <span class="scenario-icon">🚀</span>
             <span class="scenario-name">Pre-seed VC</span>
             <span class="scenario-sub">p=0.1, b=20</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="growth-vc">
+            <Tooltip text="Later-stage venture investing. Companies are de-risked, valuations are higher. Lower hit rate than pre-seed (~30%), smaller multiples (~3×). Different shape of power law, same basic maths." position="below" id="tt-growth-vc" />
             <span class="scenario-icon">📈</span>
             <span class="scenario-name">Growth VC</span>
             <span class="scenario-sub">p=0.3, b=3</span>
           </button>
           <button type="button" class="scenario-btn" data-scenario="private-equity">
+            <Tooltip text="Buyout investing in mature companies. Most deals (~75%) return capital plus a meaningful multiple (~2×), but the upside is capped compared to VC. High Kelly fraction is why PE funds concentrate into 10-20 deals." position="below" id="tt-pe" />
             <span class="scenario-icon">🏢</span>
             <span class="scenario-name">Private Equity</span>
             <span class="scenario-sub">p=0.75, b=2</span>
@@ -358,7 +368,8 @@ const sections = [
             <button type="button" class="paths-btn" data-kelly-mult="1.5" style="min-width: 3.5rem;">1.5×</button>
             <div class="strategy-label">1.5× Kelly</div>
           </div>
-          <div class="text-center">
+          <div class="text-center" style="position: relative;">
+            <Tooltip text="2× Kelly is the mathematical cliff - bet any more than that and your long-run growth rate turns negative, even with a positive edge. 2.1× puts you just over the edge so you can see what that collapse actually looks like." id="tt-over-kelly" />
             <button type="button" class="paths-btn" data-kelly-mult="2.1" style="min-width: 3.5rem;">2.1×</button>
             <div class="strategy-label">Over-Kelly</div>
           </div>
@@ -455,6 +466,7 @@ const sections = [
     document.querySelectorAll('.tooltip-trigger').forEach((trigger) => {
       trigger.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         trigger.classList.toggle('is-active');
       });
 

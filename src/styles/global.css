@@ -110,14 +110,47 @@
   border-top-color: #1a1a1a;
 }
 
+/* Below variant */
+.tooltip-content-below {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  @apply bg-ink text-paper;
+  padding: 0.6rem 0.8rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-style: italic;
+  line-height: 1.45;
+  width: max-content;
+  max-width: 280px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 10;
+}
+
+.tooltip-content-below::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-bottom-color: #1a1a1a;
+}
+
 .tooltip-trigger:hover .tooltip-content,
-.tooltip-trigger.is-active .tooltip-content {
+.tooltip-trigger:hover .tooltip-content-below,
+.tooltip-trigger.is-active .tooltip-content,
+.tooltip-trigger.is-active .tooltip-content-below {
   opacity: 1;
   pointer-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tooltip-content {
+  .tooltip-content,
+  .tooltip-content-below {
     transition: none;
   }
 }
@@ -508,7 +541,17 @@ input[type="range"]:disabled::-moz-range-thumb {
   flex-direction: column;
   align-items: center;
   gap: 0.1rem;
+  position: relative;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Tooltip ? inside scenario cards */
+.scenario-btn .tooltip-trigger {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.35rem;
+  font-size: 0.6rem;
+  z-index: 2;
 }
 
 .scenario-btn:hover {
