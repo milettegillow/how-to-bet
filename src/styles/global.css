@@ -561,14 +561,26 @@ input[type="range"]:disabled::-moz-range-thumb {
 .kelly-btn {
   @apply bg-paper text-ink;
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.55rem 0.75rem 0.5rem;
   border: 2px solid rgba(26, 26, 26, 0.15);
   border-radius: 4px;
   font-family: "EB Garamond", Georgia, serif;
   font-size: 0.82rem;
   font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.kelly-btn-sub {
+  display: block;
+  font-size: 0.68rem;
+  font-style: italic;
+  font-weight: 400;
+  color: rgba(26, 26, 26, 0.45);
 }
 
 .kelly-btn:hover {
@@ -586,22 +598,16 @@ input[type="range"]:disabled::-moz-range-thumb {
   outline-offset: 2px;
 }
 
-/* Recommended button: permanent subtle gold outline */
+/* Recommended button: permanent gold tint + outline */
 .kelly-btn-rec {
   border-color: rgba(176, 141, 44, 0.35);
+  background: rgba(176, 141, 44, 0.12);
 }
 
 .kelly-btn-rec.is-active {
   border-color: #b08d2c;
   box-shadow: 0 0 0 1px #b08d2c;
-}
-
-.kelly-rec-label {
-  font-variant: small-caps;
-  font-style: italic;
-  font-size: 0.65rem;
-  @apply text-gold;
-  margin-bottom: 0.25rem;
+  background: rgba(176, 141, 44, 0.18);
 }
 
 @media (prefers-reduced-motion: reduce) {
