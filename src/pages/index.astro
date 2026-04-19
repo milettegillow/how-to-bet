@@ -525,31 +525,14 @@ import '../styles/global.css';
 
       {/* Nudge paragraph */}
       <div class="mt-12" id="s5-nudge" style="display: none;">
-        <p>The simulator below plays out a game over and over. You pick a bet size, the simulator flips the coin thousands of times for each simulated lifetime, and shows you how often you hit your target versus how often you go broke. Try it first with a fair coin (p=0.5), then try nudging the odds slightly against you - to 0.49, say. Watch what happens.</p>
+        <p>The simulator below plays the game 1,000 times. You start with £1,000 and aim for £2,000. Each simulated lifetime either hits the target or goes broke trying. The chart shows 25 sample lifetimes so you can see the shape of what happens. The bar beneath shows what fraction of all 1,000 lifetimes ended up in each outcome. Try it first with a fair coin (p=0.5), then try nudging the odds slightly against you - to 0.49, say. Watch what happens.</p>
       </div>
 
       {/* Part 3: Gambler's ruin simulator */}
       <div class="mt-10" id="s5-simulator">
-        <h3 class="text-lg font-semibold mb-6">Gambler's Ruin Simulator</h3>
+        <h3 class="text-lg font-semibold mb-4">Gambler's Ruin Simulator</h3>
 
-        <div class="sim-control-group">
-          <label>Starting bankroll</label>
-          <div class="paths-btn-group">
-            <button type="button" class="paths-btn is-active" data-s5-bankroll="1000">£1k</button>
-            <button type="button" class="paths-btn" data-s5-bankroll="10000">£10k</button>
-            <button type="button" class="paths-btn" data-s5-bankroll="100000">£100k</button>
-          </div>
-        </div>
-
-        <div class="sim-control-group">
-          <label>Target bankroll</label>
-          <div class="paths-btn-group">
-            <button type="button" class="paths-btn is-active" data-s5-target="2">2× starting</button>
-            <button type="button" class="paths-btn" data-s5-target="5">5× starting</button>
-            <button type="button" class="paths-btn" data-s5-target="10">10× starting</button>
-          </div>
-          <div class="mt-1 text-center font-mono text-sm text-ink/50" id="s5-target-readout">= £2,000</div>
-        </div>
+        <p class="text-sm italic text-ink/50 mb-6">You have £1,000. Your target: £2,000. How do you get there?</p>
 
         <div class="sim-control-group">
           <label for="s5-p-slider">Win probability (<em>p</em>)</label>
@@ -561,7 +544,7 @@ import '../styles/global.css';
 
         <div class="sim-control-group">
           <label for="s5-bet-size-slider">Flat bet size (£)</label>
-          <input type="range" id="s5-bet-size-slider" min="1" max="500" step="1" value="10" />
+          <input type="range" id="s5-bet-size-slider" min="1" max="100" step="1" value="10" />
           <div class="mt-1 text-center">
             <output for="s5-bet-size-slider" class="font-mono text-sm" id="s5-betsize-readout">£10</output>
           </div>
@@ -571,13 +554,23 @@ import '../styles/global.css';
           <button type="button" id="s5-run" class="btn-primary" style="font-size: 0.95rem; padding: 0.6rem 2.5rem;">Run simulation</button>
         </div>
 
-        {/* Chart placeholder */}
-        <figure class="mt-8 mb-6">
-          <div id="s5-chart" class="sim-chart-container" role="img" aria-label="Gambler's ruin outcomes chart">
-            <div class="sim-chart-placeholder"><span class="text-card-red" style="font-size: 1.4rem; display: block; margin-bottom: 0.4rem;">♠</span><span style="font-variant: small-caps; font-style: italic;">Run the simulation to see the outcomes</span></div>
-          </div>
-          <figcaption>Figure 4 - Outcomes of 1,000 simulated paths. With zero edge and finite money, ruin is the expected destination.</figcaption>
-        </figure>
+        {/* Charts placeholder */}
+        <div id="s5-charts-wrap">
+          <figure class="mt-8 mb-4">
+            <div id="s5-trajectory-chart" class="sim-chart-container" role="img" aria-label="Sample path trajectories">
+              <div class="sim-chart-placeholder" style="min-height: 280px;"><span class="text-card-red" style="font-size: 1.4rem; display: block; margin-bottom: 0.4rem;">♠</span><span style="font-variant: small-caps; font-style: italic;">Run the simulation to see the outcomes</span></div>
+            </div>
+            <figcaption>Figure 4a - 25 sample paths. Each line is one simulated lifetime.</figcaption>
+          </figure>
+
+          <figure class="mb-6">
+            <div id="s5-bar-chart" style="display: none;"></div>
+            <div id="s5-bar-legend" style="display: none;" class="text-center mt-2 text-sm italic text-ink/50">
+              <span class="text-card-red">red = ruin</span> · <span style="color: rgba(26,26,26,0.35);">grey = unresolved</span> · black = hit target
+            </div>
+            <figcaption id="s5-bar-caption" style="display: none;">Figure 4b - Outcomes across 1,000 simulated paths.</figcaption>
+          </figure>
+        </div>
 
         {/* Stats (hidden until first run) */}
         <div class="readout-grid" id="s5-stats" style="display: none; grid-template-columns: 1fr 1fr 1fr;">
@@ -1862,8 +1855,17 @@ import '../styles/global.css';
 
     // ─── Part 3: Ruin simulator ───
 
+    const S5_BANKROLL = 1000;
+    const S5_TARGET = 2000;
+    const S5_PATHS = 1000;
+    const S5_MAX_ROUNDS = 10000;
+    const S5_SAMPLE_COUNT = 25;
+
     const s5RunBtn = document.getElementById('s5-run') as HTMLButtonElement;
-    const s5ChartEl = document.getElementById('s5-chart')!;
+    const s5TrajectoryEl = document.getElementById('s5-trajectory-chart')!;
+    const s5BarEl = document.getElementById('s5-bar-chart')!;
+    const s5BarLegend = document.getElementById('s5-bar-legend')!;
+    const s5BarCaption = document.getElementById('s5-bar-caption')!;
     const s5StatsPanel = document.getElementById('s5-stats')!;
     const s5StatTarget = document.getElementById('s5-stat-target')!;
     const s5StatRuin = document.getElementById('s5-stat-ruin')!;
@@ -1873,13 +1875,9 @@ import '../styles/global.css';
     const s5PReadout = document.getElementById('s5-p-readout')!;
     const s5BetSizeSlider = document.getElementById('s5-bet-size-slider') as HTMLInputElement;
     const s5BetSizeReadout = document.getElementById('s5-betsize-readout')!;
-    const s5TargetReadout = document.getElementById('s5-target-readout')!;
 
-    let s5Bankroll = 1000;
-    let s5TargetMult = 2;
     const s5ReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Readout updaters
     s5PSlider.addEventListener('input', () => {
       s5PReadout.textContent = (parseInt(s5PSlider.value) / 10).toFixed(1) + '%';
     });
@@ -1887,77 +1885,154 @@ import '../styles/global.css';
       s5BetSizeReadout.textContent = '£' + s5BetSizeSlider.value;
     });
 
-    function updateS5TargetReadout(): void {
-      const target = s5Bankroll * s5TargetMult;
-      s5TargetReadout.textContent = '= £' + target.toLocaleString('en-GB');
+    // Simulation: returns per-path trajectories + summary
+    interface RuinResult {
+      trajectories: number[][];
+      hitTarget: number;
+      hitRuin: number;
+      unresolved: number;
     }
 
-    // Bankroll buttons
-    document.querySelectorAll<HTMLButtonElement>('[data-s5-bankroll]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-s5-bankroll]').forEach(b => b.classList.remove('is-active'));
-        btn.classList.add('is-active');
-        s5Bankroll = parseInt(btn.dataset.s5Bankroll!);
-        updateS5TargetReadout();
-      });
-    });
-
-    // Target buttons
-    document.querySelectorAll<HTMLButtonElement>('[data-s5-target]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('[data-s5-target]').forEach(b => b.classList.remove('is-active'));
-        btn.classList.add('is-active');
-        s5TargetMult = parseInt(btn.dataset.s5Target!);
-        updateS5TargetReadout();
-      });
-    });
-
-    // Simulation
-    function runRuinSim(): { hitTarget: number; hitRuin: number; unresolved: number } {
-      const start = s5Bankroll;
-      const target = s5Bankroll * s5TargetMult;
+    function runRuinSim(): RuinResult {
       const p = parseInt(s5PSlider.value) / 1000;
       const bet = parseInt(s5BetSizeSlider.value);
-      const paths = 1000;
-      const maxRounds = 10000;
 
+      const trajectories: number[][] = [];
       let hitTarget = 0;
       let hitRuin = 0;
       let unresolved = 0;
 
-      for (let i = 0; i < paths; i++) {
-        let bankroll = start;
+      for (let i = 0; i < S5_PATHS; i++) {
+        const path: number[] = [S5_BANKROLL];
+        let bankroll = S5_BANKROLL;
         let resolved = false;
-        for (let r = 0; r < maxRounds; r++) {
+
+        for (let r = 0; r < S5_MAX_ROUNDS; r++) {
           if (Math.random() < p) {
             bankroll += bet;
           } else {
             bankroll -= bet;
           }
-          if (bankroll >= target) { hitTarget++; resolved = true; break; }
+          path.push(bankroll);
+          if (bankroll >= S5_TARGET) { hitTarget++; resolved = true; break; }
           if (bankroll <= 0) { hitRuin++; resolved = true; break; }
         }
         if (!resolved) unresolved++;
+        trajectories.push(path);
       }
 
-      return { hitTarget, hitRuin, unresolved };
+      return { trajectories, hitTarget, hitRuin, unresolved };
     }
 
     function analyticRuinProb(): number {
-      const start = s5Bankroll;
-      const target = s5Bankroll * s5TargetMult;
       const p = parseInt(s5PSlider.value) / 1000;
       const q = 1 - p;
       const bet = parseInt(s5BetSizeSlider.value);
-      const n = Math.round(start / bet);
-      const m = Math.round(target / bet);
+      const n = Math.round(S5_BANKROLL / bet);
+      const m = Math.round(S5_TARGET / bet);
 
       if (Math.abs(p - 0.5) < 0.0001) {
-        // Fair coin: ruin prob = 1 - n/m
         return 1 - n / m;
       }
       const ratio = q / p;
       return (1 - Math.pow(ratio, n)) / (1 - Math.pow(ratio, m));
+    }
+
+    function renderTrajectoryChart(trajectories: number[][]): void {
+      const width = s5TrajectoryEl.clientWidth || 600;
+
+      // Pick 25 random sample paths
+      const indices: number[] = [];
+      const pool = [...Array(trajectories.length).keys()];
+      for (let i = 0; i < Math.min(S5_SAMPLE_COUNT, pool.length); i++) {
+        const j = i + Math.floor(Math.random() * (pool.length - i));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+        indices.push(pool[i]);
+      }
+
+      // Build line data
+      const lineData: { round: number; bankroll: number; path: number }[] = [];
+      for (const idx of indices) {
+        const traj = trajectories[idx];
+        for (let r = 0; r < traj.length; r++) {
+          lineData.push({ round: r, bankroll: traj[r], path: idx });
+        }
+      }
+
+      // Find max round for domain
+      let maxRound = 0;
+      for (const idx of indices) {
+        if (trajectories[idx].length > maxRound) maxRound = trajectories[idx].length;
+      }
+
+      const chart = Plot.plot({
+        width,
+        height: 280,
+        style: {
+          fontFamily: '"EB Garamond", Georgia, serif',
+          fontSize: '13px',
+          background: 'transparent',
+        },
+        x: { label: "Round", domain: [0, maxRound] },
+        y: { label: "↑ Bankroll (£)", domain: [0, S5_TARGET * 1.1] },
+        marks: [
+          Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
+          // Target line
+          Plot.ruleY([S5_TARGET], { stroke: "#1a1a1a", strokeDasharray: "6,4", strokeOpacity: 0.4 }),
+          Plot.text([{ x: maxRound * 0.95, y: S5_TARGET }], {
+            x: "x", y: "y", text: ["Target"], dy: -10, fontSize: 11, fill: "#1a1a1a", textAnchor: "end",
+          }),
+          // Ruin label at y=0
+          Plot.text([{ x: 0, y: 0 }], {
+            x: "x", y: "y", text: ["Ruin"], dx: 25, dy: -8, fontSize: 11, fill: "#a8252c",
+          }),
+          // Sample paths
+          Plot.line(lineData, {
+            x: "round", y: "bankroll", z: "path",
+            stroke: "#a8252c", strokeOpacity: 0.4, strokeWidth: 1.2,
+            curve: "linear",
+          }),
+        ],
+      });
+
+      s5TrajectoryEl.innerHTML = '';
+      s5TrajectoryEl.appendChild(chart);
+    }
+
+    function renderSummaryBar(hitTarget: number, hitRuin: number, unresolvedCount: number): void {
+      const total = hitTarget + hitRuin + unresolvedCount;
+      const pctRuin = hitRuin / total * 100;
+      const pctUnresolved = unresolvedCount / total * 100;
+      const pctTarget = hitTarget / total * 100;
+
+      s5BarEl.style.display = '';
+      s5BarLegend.style.display = '';
+      s5BarCaption.style.display = '';
+
+      const bar = document.createElement('div');
+      bar.style.cssText = 'display: flex; height: 36px; border-radius: 4px; overflow: hidden; font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 600;';
+
+      if (pctRuin > 0) {
+        const seg = document.createElement('div');
+        seg.style.cssText = `width: ${pctRuin}%; background: #a8252c; color: #fafaf7; display: flex; align-items: center; justify-content: center;`;
+        if (pctRuin > 8) seg.textContent = pctRuin.toFixed(1) + '%';
+        bar.appendChild(seg);
+      }
+      if (pctUnresolved > 0) {
+        const seg = document.createElement('div');
+        seg.style.cssText = `width: ${pctUnresolved}%; background: rgba(26,26,26,0.2); color: #1a1a1a; display: flex; align-items: center; justify-content: center;`;
+        if (pctUnresolved > 8) seg.textContent = pctUnresolved.toFixed(1) + '%';
+        bar.appendChild(seg);
+      }
+      if (pctTarget > 0) {
+        const seg = document.createElement('div');
+        seg.style.cssText = `width: ${pctTarget}%; background: #1a1a1a; color: #fafaf7; display: flex; align-items: center; justify-content: center;`;
+        if (pctTarget > 8) seg.textContent = pctTarget.toFixed(1) + '%';
+        bar.appendChild(seg);
+      }
+
+      s5BarEl.innerHTML = '';
+      s5BarEl.appendChild(bar);
     }
 
     async function doS5Run(): Promise<void> {
@@ -1969,43 +2044,8 @@ import '../styles/global.css';
       const result = runRuinSim();
       const total = result.hitTarget + result.hitRuin + result.unresolved;
 
-      // Render bar chart
-      const chartData = [
-        { outcome: 'Hit target', count: result.hitTarget, pct: result.hitTarget / total * 100, color: '#1a1a1a' },
-        { outcome: 'Hit ruin', count: result.hitRuin, pct: result.hitRuin / total * 100, color: '#a8252c' },
-      ];
-      if (result.unresolved > 0) {
-        chartData.push({ outcome: 'Unresolved', count: result.unresolved, pct: result.unresolved / total * 100, color: 'rgba(26,26,26,0.25)' });
-      }
-
-      const width = s5ChartEl.clientWidth || 600;
-      const chart = Plot.plot({
-        width,
-        height: 200,
-        style: {
-          fontFamily: '"EB Garamond", Georgia, serif',
-          fontSize: '13px',
-          background: 'transparent',
-        },
-        x: { label: null, domain: chartData.map(d => d.outcome), padding: 0.3 },
-        y: { label: "Paths", domain: [0, 1000], grid: true, ticks: 5 },
-        color: { domain: chartData.map(d => d.outcome), range: chartData.map(d => d.color) },
-        marks: [
-          Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
-          Plot.barY(chartData, {
-            x: "outcome", y: "count", fill: "outcome",
-            tip: true,
-          }),
-          Plot.text(chartData, {
-            x: "outcome", y: "count",
-            text: (d: any) => d.pct.toFixed(1) + '%',
-            dy: -10, fontSize: 13, fontWeight: "600",
-          }),
-        ],
-      });
-
-      s5ChartEl.innerHTML = '';
-      s5ChartEl.appendChild(chart);
+      renderTrajectoryChart(result.trajectories);
+      renderSummaryBar(result.hitTarget, result.hitRuin, result.unresolved);
 
       // Show stats
       if (s5StatsPanel.style.display === 'none') {
@@ -2037,7 +2077,5 @@ import '../styles/global.css';
       e.preventDefault();
       document.getElementById('beyond')?.scrollIntoView({ behavior: 'smooth' });
     });
-
-    updateS5TargetReadout();
   </script>
 </Base>
