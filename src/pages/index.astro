@@ -105,6 +105,8 @@ import '../styles/global.css';
 
       <p>The formula captures the full picture: bet more when edge is large, and bet less when the payout <em>b</em> is large. A bigger <em>b</em> means rarer wins, so you can go through long losing runs before the payoff arrives. Kelly shrinks your bet to keep you solvent through those runs.</p>
 
+      <p class="italic" style="font-size: 0.85rem; color: rgba(26,26,26,0.5); padding-left: 1rem; border-left: 2px solid rgba(26,26,26,0.08);">The formula is named after John Kelly Jr., a Bell Labs researcher who derived it in 1956 in a paper on information theory. He wasn't trying to solve a gambling problem - he was trying to understand how much information a noisy communication channel could carry, and betting happened to be the cleanest way to frame the maths. Kelly himself never used the formula to make money. He died at 41, in 1965, without publishing anything else on the topic.</p>
+
       <p>Try it below. Drag the probability and payout sliders, and watch edge, fair odds, and the Kelly fraction update. Then click one of the reference chips below the calculator: each applies the parameters of a real-world bet so you can see how edge behaves across orders of magnitude.</p>
 
       {/* ─── Part 2: Edge calculator ─── */}
@@ -596,9 +598,9 @@ import '../styles/global.css';
         </div>
 
         {/* Asymmetry callout */}
-        <div id="s5-asymmetry" style="display: none;" class="my-8 py-6" style="border-top: 1px solid rgba(26,26,26,0.08); border-bottom: 1px solid rgba(26,26,26,0.08);">
-          <div class="kelly-strategy-block py-6">
-            <div class="text-center mb-2" style="font-variant: small-caps; font-style: italic; font-size: 0.85rem;">The asymmetry</div>
+        <div id="s5-asymmetry" style="display: none;" class="mt-12 mb-8">
+          <div class="kelly-strategy-block py-8">
+            <div class="text-center mb-4" style="font-variant: small-caps; font-style: italic; font-size: 1.3rem;">The asymmetry</div>
             <div class="text-center mb-3" id="s5-asymmetry-text"></div>
             <div class="text-center text-sm italic text-ink/45">Even a modest target asks you to risk your whole bankroll for a smaller win. This is gambler's ruin: losing everything is permanent, winning is optional.</div>
           </div>
@@ -1620,6 +1622,7 @@ import '../styles/global.css';
         simPSlider.value = String(Math.round(s.p * 1000));
         simBSlider.value = String(Math.round(simBToSlider(s.b)));
         updateAllReadouts();
+        renderKellyCurve();
         updateKellyDisplay();
 
         clearScenarioPreset();
@@ -1790,9 +1793,9 @@ import '../styles/global.css';
         s4Commentary.textContent = 'Both strategies are losing money at this level of error.';
       } else if (wFull < 1000) {
         s4Commentary.textContent = 'Full Kelly is losing you money. Half Kelly is still growing.';
-      } else if (wHalf > wFull * 1.1) {
+      } else if (wHalf > wFull * 1.2) {
         s4Commentary.textContent = 'Half Kelly is winning.';
-      } else if (wFull > wHalf * 1.1) {
+      } else if (wFull > wHalf * 1.2) {
         s4Commentary.textContent = 'Full Kelly is winning.';
       } else {
         s4Commentary.textContent = 'Full Kelly and Half Kelly are roughly tied.';

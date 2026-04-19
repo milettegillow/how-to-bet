@@ -86,8 +86,10 @@
   font-size: 0.6rem;
   font-weight: 700;
   line-height: 1;
-  vertical-align: middle;
-  margin-left: 3px;
+  vertical-align: super;
+  margin-left: 2px;
+  position: relative;
+  top: -2px;
   transition: background-color 0.15s ease, transform 0.15s ease;
   flex-shrink: 0;
 }
