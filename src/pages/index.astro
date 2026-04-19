@@ -442,36 +442,46 @@ import '../styles/global.css';
 
       <p>The chart below shows what happens to your growth rate if your edge estimate is wrong. Move the slider to vary how far off your estimate is, and watch where full Kelly lands compared to half Kelly.</p>
 
-      {/* Part 2: Slider + Chart + Readouts */}
+      {/* Part 2: Chart + Slider + Readouts */}
       <div class="mt-10">
-        <div class="sim-control-group">
-          <label for="s4-error-slider">Your edge estimate is off by: <Tooltip text="Your estimated edge, as a percentage of your true edge. If you think you'll win 55% of the time but you actually win 52%, your edge estimate is too high - that's a positive error. If you think you'll win 51% but actually win 55%, your estimate is too low - that's a negative error. Real professionals are almost always a bit over-confident, which is why this chart's right half matters more." id="tt-edge-error" /></label>
-          <input type="range" id="s4-error-slider" min="-50" max="50" step="1" value="0" />
-          <div class="mt-1 text-center">
-            <output for="s4-error-slider" class="font-mono text-sm" id="s4-error-readout">0% (spot on)</output>
-          </div>
+        <div class="sim-control-group mb-6">
+          <label for="s4-error-slider">How well do you know your edge? <Tooltip text="In real life, you never know your true edge exactly - you only have an estimate. This slider simulates what happens when your estimate is wrong. Drag right to simulate overconfidence (you think you have more edge than you do). Drag left to simulate underconfidence." id="tt-edge-error" /></label>
+        </div>
+
+        <figure class="mb-0">
+          <div id="chart-s4-error" class="sim-chart-container" role="img" aria-label="Growth rate when edge estimate is wrong, comparing Full Kelly vs Half Kelly" style="margin-bottom: 0;"></div>
+        </figure>
+
+        <div id="s4-slider-wrap" style="padding: 0;">
+          <input type="range" id="s4-error-slider" min="-50" max="50" step="1" value="0" style="margin: 0;" />
+        </div>
+
+        <div class="text-center mt-3 mb-1">
+          <div class="font-mono text-sm" id="s4-error-readout">0%</div>
+          <div class="font-serif italic mt-1" style="font-size: 1.4rem; line-height: 1.2;" id="s4-zone-label">Spot on</div>
+        </div>
+
+        <div class="text-center mt-2 mb-4 text-ink/40" style="font-size: 0.75rem;">Edge estimate error (%)</div>
+
+        <figcaption class="mb-8">Figure 3 - Long-run growth rate when the gambler's edge estimate is wrong. Half Kelly stays positive across a much wider error range.</figcaption>
+      </div>
+
+      <div class="readout-grid" style="grid-template-columns: 1fr 1fr;" id="s4-stats">
+        <div class="readout-card">
+          <div class="readout-label">Full Kelly</div>
+          <div class="text-sm italic text-ink/50 mb-1">After 500 bets:</div>
+          <output class="readout-value block" id="s4-full-wealth" style="font-size: 1.2rem;">-</output>
+          <div class="readout-caption" id="s4-full-mult"></div>
+        </div>
+        <div class="readout-card">
+          <div class="readout-label">Half Kelly</div>
+          <div class="text-sm italic text-ink/50 mb-1">After 500 bets:</div>
+          <output class="readout-value block" id="s4-half-wealth" style="font-size: 1.2rem;">-</output>
+          <div class="readout-caption" id="s4-half-mult"></div>
         </div>
       </div>
 
-      <figure class="mt-8 mb-6">
-        <div id="chart-s4-error" class="sim-chart-container" role="img" aria-label="Growth rate when edge estimate is wrong, comparing Full Kelly vs Half Kelly"></div>
-        <figcaption>Figure 3 - Long-run growth rate when the gambler's edge estimate is wrong. Half Kelly stays positive across a much wider error range.</figcaption>
-      </figure>
-
-      <div class="readout-grid" style="grid-template-columns: 1fr 1fr 1fr;" id="s4-stats">
-        <div class="readout-card">
-          <div class="readout-label">Full Kelly growth rate</div>
-          <output class="readout-value block" id="s4-full-rate" style="font-size: 1.1rem;">-</output>
-        </div>
-        <div class="readout-card">
-          <div class="readout-label">Half Kelly growth rate</div>
-          <output class="readout-value block" id="s4-half-rate" style="font-size: 1.1rem;">-</output>
-        </div>
-        <div class="readout-card">
-          <div class="readout-label">Comparison</div>
-          <output class="readout-value block" id="s4-ratio" style="font-size: 1.1rem;">-</output>
-        </div>
-      </div>
+      <div class="text-center mt-4 mb-8 font-serif italic" style="font-size: 1.1rem;" id="s4-commentary"></div>
 
       {/* Part 3: Closing prose */}
       <div class="mt-12">
@@ -1632,15 +1642,18 @@ import '../styles/global.css';
   <script>
     // ─── Section 4: Full Kelly vs Half Kelly ───
     import * as Plot from "@observablehq/plot";
+    import { formatCurrency } from "../lib/format";
 
     const s4ErrorSlider = document.getElementById('s4-error-slider') as HTMLInputElement;
     const s4ErrorReadout = document.getElementById('s4-error-readout')!;
+    const s4ZoneLabel = document.getElementById('s4-zone-label')!;
     const chartS4El = document.getElementById('chart-s4-error')!;
-    const s4FullRate = document.getElementById('s4-full-rate')!;
-    const s4HalfRate = document.getElementById('s4-half-rate')!;
-    const s4Ratio = document.getElementById('s4-ratio')!;
+    const s4FullWealth = document.getElementById('s4-full-wealth')!;
+    const s4HalfWealth = document.getElementById('s4-half-wealth')!;
+    const s4FullMult = document.getElementById('s4-full-mult')!;
+    const s4HalfMult = document.getElementById('s4-half-mult')!;
+    const s4Commentary = document.getElementById('s4-commentary')!;
 
-    // Get p and b from Section 3's current state, or default to biased coin
     function getS4PB(): { p: number; b: number } {
       const getter = (window as any).__s3GetPB;
       if (getter) return getter();
@@ -1654,62 +1667,75 @@ import '../styles/global.css';
       return pTrue * Math.log(1 + fBet * b) + qTrue * Math.log(1 - fBet);
     }
 
-    function formatGrowthPct(g: number): string {
-      const pct = (g * 100);
-      const sign = pct >= 0 ? '+' : '';
-      return sign + pct.toFixed(3) + '%';
+    function getZone(v: number): { label: string; color: string; bold: boolean } {
+      if (v <= -30) return { label: 'Very underconfident', color: '#6b7f5e', bold: false };
+      if (v <= -10) return { label: 'Underconfident', color: '#6b7f5e', bold: false };
+      if (v < 10) return { label: 'Spot on', color: '#1a1a1a', bold: false };
+      if (v < 30) return { label: 'Overconfident', color: '#a8252c', bold: false };
+      return { label: 'Very overconfident', color: '#a8252c', bold: true };
     }
 
     function renderS4Chart(): void {
       const { p, b } = getS4PB();
       const edgeTrue = b * p - (1 - p);
-      const currentError = parseInt(s4ErrorSlider.value) / 100;
+      const currentError = parseInt(s4ErrorSlider.value);
 
       const data: { error: number; full: number; half: number }[] = [];
-
       for (let ePct = -50; ePct <= 50; ePct++) {
         const e = ePct / 100;
         const edgeEst = edgeTrue * (1 + e);
         let fEst = edgeEst > 0 ? edgeEst / b : 0;
         if (fEst > 1) fEst = 1;
-
-        const gFull = computeGrowth(fEst, p, b);
-        const gHalf = computeGrowth(fEst / 2, p, b);
-
-        data.push({ error: ePct, full: gFull, half: gHalf });
+        data.push({
+          error: ePct,
+          full: computeGrowth(fEst, p, b),
+          half: computeGrowth(fEst / 2, p, b),
+        });
       }
 
-      // Separate negative-growth shading for Full Kelly
       const negData = data.filter(d => d.full < 0).map(d => ({ error: d.error, neg: d.full }));
-
       const width = chartS4El.clientWidth || 600;
+
+      // Compute y-domain from actual data with 15% padding
+      const allVals = data.flatMap(d => [d.full, d.half]);
+      const yMin = Math.min(...allVals);
+      const yMax = Math.max(...allVals);
+      const yPad = (yMax - yMin) * 0.15 || 0.001;
+      const yDomain: [number, number] = [yMin - yPad, yMax + yPad];
 
       const chart = Plot.plot({
         width,
         height: 280,
+        marginBottom: 8,
+        marginLeft: 60,
+        marginRight: 20,
         style: {
           fontFamily: '"EB Garamond", Georgia, serif',
           fontSize: '13px',
           background: 'transparent',
         },
-        x: { label: "Edge estimate error (%)", domain: [-50, 50], ticks: [- 50, -25, 0, 25, 50], tickFormat: (d: number) => (d > 0 ? '+' : '') + d + '%' },
-        y: { label: "↑ Growth rate (per bet)", grid: true },
+        x: { label: null, domain: [-50, 50], axis: null },
+        y: { label: "↑ Growth rate (per bet)", grid: true, domain: yDomain },
         marks: [
+          // Zone shading - use computed y domain
+          Plot.rect([{ x1: 0, x2: 50 }], {
+            x1: "x1", x2: "x2", y1: yDomain[0], y2: yDomain[1],
+            fill: "#a8252c", fillOpacity: 0.04,
+          }),
+          Plot.rect([{ x1: -50, x2: 0 }], {
+            x1: "x1", x2: "x2", y1: yDomain[0], y2: yDomain[1],
+            fill: "#6b7f5e", fillOpacity: 0.04,
+          }),
           Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
           Plot.ruleY([0], { stroke: "#1a1a1a", strokeOpacity: 0.15 }),
-          // Shade negative Full Kelly region
           ...(negData.length > 0 ? [Plot.areaY(negData, { x: "error", y: "neg", fill: "#6b7f5e", fillOpacity: 0.1, curve: "natural" })] : []),
-          // Full Kelly curve
           Plot.lineY(data, { x: "error", y: "full", stroke: "#a8252c", strokeWidth: 2.5, curve: "natural" }),
-          // Half Kelly curve
           Plot.lineY(data, { x: "error", y: "half", stroke: "#1a1a1a", strokeWidth: 2, curve: "natural" }),
-          // Vertical marker at current slider position
-          Plot.ruleX([currentError * 100], { stroke: "#a8252c", strokeWidth: 1.5, strokeDasharray: "4,3" }),
-          // Labels
-          Plot.text([{ x: -35, y: computeGrowth(Math.max(0, edgeTrue * 0.65 / b), p, b) }], {
+          Plot.ruleX([currentError], { stroke: "#a8252c", strokeWidth: 1.5, strokeDasharray: "4,3" }),
+          Plot.text([{ x: -40, y: computeGrowth(Math.max(0, edgeTrue * 0.6 / b), p, b) }], {
             x: "x", y: "y", text: ["Full Kelly"], fill: "#a8252c", fontSize: 12, fontWeight: "600", dy: -10,
           }),
-          Plot.text([{ x: -35, y: computeGrowth(Math.max(0, edgeTrue * 0.65 / b) / 2, p, b) }], {
+          Plot.text([{ x: -40, y: computeGrowth(Math.max(0, edgeTrue * 0.6 / b) / 2, p, b) }], {
             x: "x", y: "y", text: ["Half Kelly"], fill: "#1a1a1a", fontSize: 12, fontWeight: "600", dy: -10,
           }),
         ],
@@ -1718,14 +1744,19 @@ import '../styles/global.css';
       chartS4El.innerHTML = '';
       chartS4El.appendChild(chart);
 
-      // Update readouts at current slider position
+      // Align slider to chart's plot area
+      const sliderWrap = document.getElementById('s4-slider-wrap')!;
+      sliderWrap.style.paddingLeft = '60px';
+      sliderWrap.style.paddingRight = '20px';
+
       updateS4Readouts();
     }
 
     function updateS4Readouts(): void {
       const { p, b } = getS4PB();
       const edgeTrue = b * p - (1 - p);
-      const e = parseInt(s4ErrorSlider.value) / 100;
+      const errVal = parseInt(s4ErrorSlider.value);
+      const e = errVal / 100;
       const edgeEst = edgeTrue * (1 + e);
       let fEst = edgeEst > 0 ? edgeEst / b : 0;
       if (fEst > 1) fEst = 1;
@@ -1733,61 +1764,56 @@ import '../styles/global.css';
       const gFull = computeGrowth(fEst, p, b);
       const gHalf = computeGrowth(fEst / 2, p, b);
 
-      s4FullRate.textContent = formatGrowthPct(gFull);
-      s4FullRate.style.color = gFull < 0 ? '#a8252c' : '';
+      // Wealth after 500 bets
+      const wFull = gFull <= -1 ? 0 : Math.max(0, 1000 * Math.exp(gFull * 500));
+      const wHalf = gHalf <= -1 ? 0 : Math.max(0, 1000 * Math.exp(gHalf * 500));
 
-      s4HalfRate.textContent = formatGrowthPct(gHalf);
-      s4HalfRate.style.color = gHalf < 0 ? '#a8252c' : '';
+      s4FullWealth.innerHTML = wFull < 1 ? '£0' : formatCurrency(Math.round(wFull));
+      s4FullWealth.style.color = wFull < 1000 ? '#a8252c' : '';
+      s4FullMult.textContent = wFull < 1 ? '(bankrupt)' : `(${(wFull / 1000).toFixed(1)}× starting bankroll)`;
+      s4FullMult.style.color = wFull < 1000 ? '#a8252c' : '';
 
-      if (gFull > 0 && gHalf > 0) {
-        const ratio = (gHalf / gFull * 100).toFixed(0);
-        s4Ratio.textContent = `Half captures ${ratio}% of Full Kelly's growth`;
-        s4Ratio.style.color = '';
-      } else if (gFull <= 0 && gHalf > 0) {
-        s4Ratio.textContent = "Full Kelly has gone negative - Half is still growing";
-        s4Ratio.style.color = '';
-      } else if (gFull <= 0 && gHalf <= 0) {
-        s4Ratio.textContent = "Both negative";
-        s4Ratio.style.color = '#a8252c';
+      s4HalfWealth.innerHTML = wHalf < 1 ? '£0' : formatCurrency(Math.round(wHalf));
+      s4HalfWealth.style.color = wHalf < 1000 ? '#a8252c' : '';
+      s4HalfMult.textContent = wHalf < 1 ? '(bankrupt)' : `(${(wHalf / 1000).toFixed(1)}× starting bankroll)`;
+      s4HalfMult.style.color = wHalf < 1000 ? '#a8252c' : '';
+
+      // Commentary
+      if (wFull < 1000 && wHalf < 1000) {
+        s4Commentary.textContent = 'Both strategies are losing money at this level of error.';
+      } else if (wFull < 1000) {
+        s4Commentary.textContent = 'Full Kelly is losing you money. Half Kelly is still growing.';
+      } else if (wHalf > wFull * 1.1) {
+        s4Commentary.textContent = 'Half Kelly is winning.';
+      } else if (wFull > wHalf * 1.1) {
+        s4Commentary.textContent = 'Full Kelly is winning.';
       } else {
-        const ratio = (gHalf / gFull * 100).toFixed(0);
-        s4Ratio.textContent = `Half captures ${ratio}% of Full Kelly's growth`;
-        s4Ratio.style.color = '';
+        s4Commentary.textContent = 'Full Kelly and Half Kelly are roughly tied.';
       }
 
-      // Update slider readout
-      const errVal = parseInt(s4ErrorSlider.value);
-      if (errVal === 0) {
-        s4ErrorReadout.textContent = '0% (spot on)';
-      } else {
-        s4ErrorReadout.textContent = (errVal > 0 ? '+' : '') + errVal + '%';
-      }
+      // Slider readout + zone
+      s4ErrorReadout.textContent = errVal === 0 ? '0%' : (errVal > 0 ? '+' : '') + errVal + '%';
+      const zone = getZone(errVal);
+      s4ZoneLabel.textContent = zone.label;
+      s4ZoneLabel.style.color = zone.color;
+      s4ZoneLabel.style.fontWeight = zone.bold ? '700' : '';
     }
 
     s4ErrorSlider.addEventListener('input', () => {
       renderS4Chart();
     });
 
-    // Scroll link
     document.getElementById('scroll-to-s5')?.addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('ruin')?.scrollIntoView({ behavior: 'smooth' });
     });
 
-    // Listen for Section 3 scenario changes to update this chart
-    // (Scenarios change p/b which affects our curves)
     document.querySelectorAll('[data-scenario]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Small delay to let Section 3 update its sliders first
-        setTimeout(renderS4Chart, 50);
-      });
+      btn.addEventListener('click', () => setTimeout(renderS4Chart, 50));
     });
-
-    // Also update when Section 3's p/b sliders change
     document.getElementById('sim-p')?.addEventListener('input', () => setTimeout(renderS4Chart, 10));
     document.getElementById('sim-b')?.addEventListener('input', () => setTimeout(renderS4Chart, 10));
 
-    // Initial render
     renderS4Chart();
   </script>
 
