@@ -535,14 +535,36 @@ import '../styles/global.css';
 
       {/* Nudge paragraph */}
       <div class="mt-12" id="s5-nudge" style="display: none;">
-        <p>The simulator below plays the game 1,000 times. You start with £1,000 and aim for £2,000. Each simulated lifetime either hits the target or goes broke trying. The chart shows 25 sample lifetimes so you can see the shape of what happens. The bar beneath shows what fraction of all 1,000 lifetimes ended up in each outcome. Try it first with a fair coin (p=0.5), then try nudging the odds slightly against you - to 0.49, say. Watch what happens.</p>
+        <p>The simulator below plays the game 1,000 times. You start with £1,000 and choose your target. Each simulated lifetime either hits your target or goes broke trying. Try setting the target to 1.1× - a modest goal - and notice: even with a fair coin, ruin is still a real risk. Then try 5×. The bigger your ambition, the more likely ruin becomes.</p>
       </div>
 
       {/* Part 3: Gambler's ruin simulator */}
       <div class="mt-10" id="s5-simulator">
         <h3 class="text-lg font-semibold mb-4">Gambler's Ruin Simulator</h3>
 
-        <p class="text-sm italic text-ink/50 mb-6">You have £1,000. Your target: £2,000. How do you get there?</p>
+        <div class="sim-control-group">
+          <label>How much do you want to make?</label>
+          <div class="paths-btn-group">
+            <div class="text-center" style="flex: 1;">
+              <button type="button" class="paths-btn" data-s5-target="1.1" style="width: 100%;">1.1×</button>
+              <div class="strategy-label">£1,100</div>
+            </div>
+            <div class="text-center" style="flex: 1;">
+              <button type="button" class="paths-btn" data-s5-target="1.5" style="width: 100%;">1.5×</button>
+              <div class="strategy-label">£1,500</div>
+            </div>
+            <div class="text-center" style="flex: 1;">
+              <button type="button" class="paths-btn is-active" data-s5-target="2" style="width: 100%;">2×</button>
+              <div class="strategy-label">£2,000</div>
+            </div>
+            <div class="text-center" style="flex: 1;">
+              <button type="button" class="paths-btn" data-s5-target="5" style="width: 100%;">5×</button>
+              <div class="strategy-label">£5,000</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-sm italic text-ink/50 mb-6" id="s5-orient">You have £1,000. Target: £2,000. How do you get there?</p>
 
         <div class="sim-control-group">
           <label for="s5-p-slider">Win probability (<em>p</em>)</label>
@@ -564,7 +586,7 @@ import '../styles/global.css';
           <button type="button" id="s5-run" class="btn-primary" style="font-size: 0.95rem; padding: 0.6rem 2.5rem;">Run simulation</button>
         </div>
 
-        {/* Charts placeholder */}
+        {/* Charts */}
         <div id="s5-charts-wrap">
           <figure class="mt-8 mb-4">
             <div id="s5-trajectory-chart" class="sim-chart-container" role="img" aria-label="Sample path trajectories">
@@ -573,35 +595,24 @@ import '../styles/global.css';
             <figcaption>Figure 4a - 25 sample paths. Each line is one simulated lifetime.</figcaption>
           </figure>
 
-          <figure class="mb-6">
-            <div id="s5-bar-chart" style="display: none;"></div>
-            <div id="s5-bar-legend" style="display: none;" class="text-center mt-2 text-sm italic text-ink/50">
-              <span class="text-card-red">red = ruin</span> · <span style="color: rgba(26,26,26,0.35);">grey = unresolved</span> · black = hit target
-            </div>
-            <figcaption id="s5-bar-caption" style="display: none;">Figure 4b - Outcomes across 1,000 simulated paths.</figcaption>
-          </figure>
+          <div id="s5-bar-chart" style="display: none;"></div>
+          <div class="text-center mt-2 mb-1 text-sm italic text-ink/40" id="s5-theory-line" style="display: none;"></div>
         </div>
 
-        {/* Stats (hidden until first run) */}
-        <div class="readout-grid" id="s5-stats" style="display: none; grid-template-columns: 1fr 1fr 1fr;">
-          <div class="readout-card">
-            <div class="readout-label">Hit target</div>
-            <output class="readout-value block" id="s5-stat-target" style="font-size: 1.1rem;">-</output>
-          </div>
-          <div class="readout-card">
-            <div class="readout-label">Hit ruin</div>
-            <output class="readout-value block" id="s5-stat-ruin" style="font-size: 1.1rem;">-</output>
-          </div>
-          <div class="readout-card">
-            <div class="readout-label">Analytic ruin probability</div>
-            <output class="readout-value block" id="s5-stat-analytic" style="font-size: 1.1rem;">-</output>
-            <div class="readout-caption">the mathematical prediction - compare it to the simulation result</div>
+        {/* Asymmetry callout */}
+        <div id="s5-asymmetry" style="display: none;" class="my-8 py-6" style="border-top: 1px solid rgba(26,26,26,0.08); border-bottom: 1px solid rgba(26,26,26,0.08);">
+          <div class="kelly-strategy-block py-6">
+            <div class="text-center mb-2" style="font-variant: small-caps; font-style: italic; font-size: 0.85rem;">The asymmetry</div>
+            <div class="text-center mb-3" id="s5-asymmetry-text"></div>
+            <div class="text-center text-sm italic text-ink/45">Even a modest target asks you to risk your whole bankroll for a smaller win. This is gambler's ruin: losing everything is permanent, winning is optional.</div>
           </div>
         </div>
       </div>
 
       {/* Part 4: Transition */}
       <div class="mt-12">
+        <p>Notice: at every setting, your expected profit is exactly zero. Gambler's ruin isn't about losing more than you win - it's about losing everything, which is permanent, while gains only compound while you're still in the game.</p>
+
         <p>This is what a casino is, mathematically. A small negative edge, repeated until you run out of money. The house doesn't need to beat you on any single round - it just needs to stay in the game longer than you can.</p>
 
         <div class="text-center mt-6">
@@ -1882,27 +1893,24 @@ import '../styles/global.css';
     // ─── Part 3: Ruin simulator ───
 
     const S5_BANKROLL = 1000;
-    const S5_TARGET = 2000;
     const S5_PATHS = 1000;
     const S5_MAX_ROUNDS = 10000;
     const S5_SAMPLE_COUNT = 25;
 
+    let s5TargetMult = 2;
+
     const s5RunBtn = document.getElementById('s5-run') as HTMLButtonElement;
     const s5TrajectoryEl = document.getElementById('s5-trajectory-chart')!;
     const s5BarEl = document.getElementById('s5-bar-chart')!;
-    const s5BarLegend = document.getElementById('s5-bar-legend')!;
-    const s5BarCaption = document.getElementById('s5-bar-caption')!;
-    const s5StatsPanel = document.getElementById('s5-stats')!;
-    const s5StatTarget = document.getElementById('s5-stat-target')!;
-    const s5StatRuin = document.getElementById('s5-stat-ruin')!;
-    const s5StatAnalytic = document.getElementById('s5-stat-analytic')!;
+    const s5TheoryLine = document.getElementById('s5-theory-line')!;
+    const s5Asymmetry = document.getElementById('s5-asymmetry')!;
+    const s5AsymmetryText = document.getElementById('s5-asymmetry-text')!;
+    const s5Orient = document.getElementById('s5-orient')!;
 
     const s5PSlider = document.getElementById('s5-p-slider') as HTMLInputElement;
     const s5PReadout = document.getElementById('s5-p-readout')!;
     const s5BetSizeSlider = document.getElementById('s5-bet-size-slider') as HTMLInputElement;
     const s5BetSizeReadout = document.getElementById('s5-betsize-readout')!;
-
-    const s5ReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     s5PSlider.addEventListener('input', () => {
       s5PReadout.textContent = (parseInt(s5PSlider.value) / 10).toFixed(1) + '%';
@@ -1911,114 +1919,141 @@ import '../styles/global.css';
       s5BetSizeReadout.textContent = '£' + s5BetSizeSlider.value;
     });
 
-    // Simulation: returns per-path trajectories + summary
+    function updateS5Orient(): void {
+      const target = S5_BANKROLL * s5TargetMult;
+      s5Orient.textContent = `You have £1,000. Target: £${target.toLocaleString('en-GB')}. How do you get there?`;
+    }
+
+    // Target buttons
+    document.querySelectorAll<HTMLButtonElement>('[data-s5-target]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-s5-target]').forEach(b => b.classList.remove('is-active'));
+        btn.classList.add('is-active');
+        s5TargetMult = parseFloat(btn.dataset.s5Target!);
+        updateS5Orient();
+      });
+    });
+
+    // Simulation
+    interface RuinPath {
+      trajectory: number[];
+      outcome: 'target' | 'ruin' | 'unresolved';
+    }
+
     interface RuinResult {
-      trajectories: number[][];
+      paths: RuinPath[];
       hitTarget: number;
       hitRuin: number;
       unresolved: number;
     }
 
     function runRuinSim(): RuinResult {
+      const target = S5_BANKROLL * s5TargetMult;
       const p = parseInt(s5PSlider.value) / 1000;
       const bet = parseInt(s5BetSizeSlider.value);
 
-      const trajectories: number[][] = [];
+      const paths: RuinPath[] = [];
       let hitTarget = 0;
       let hitRuin = 0;
       let unresolved = 0;
 
       for (let i = 0; i < S5_PATHS; i++) {
-        const path: number[] = [S5_BANKROLL];
+        const traj: number[] = [S5_BANKROLL];
         let bankroll = S5_BANKROLL;
-        let resolved = false;
+        let outcome: 'target' | 'ruin' | 'unresolved' = 'unresolved';
 
         for (let r = 0; r < S5_MAX_ROUNDS; r++) {
-          if (Math.random() < p) {
-            bankroll += bet;
-          } else {
-            bankroll -= bet;
-          }
-          path.push(bankroll);
-          if (bankroll >= S5_TARGET) { hitTarget++; resolved = true; break; }
-          if (bankroll <= 0) { hitRuin++; resolved = true; break; }
+          bankroll += Math.random() < p ? bet : -bet;
+          traj.push(bankroll);
+          if (bankroll >= target) { outcome = 'target'; hitTarget++; break; }
+          if (bankroll <= 0) { outcome = 'ruin'; hitRuin++; break; }
         }
-        if (!resolved) unresolved++;
-        trajectories.push(path);
+        if (outcome === 'unresolved') unresolved++;
+        paths.push({ trajectory: traj, outcome });
       }
 
-      return { trajectories, hitTarget, hitRuin, unresolved };
+      return { paths, hitTarget, hitRuin, unresolved };
     }
 
     function analyticRuinProb(): number {
+      const target = S5_BANKROLL * s5TargetMult;
       const p = parseInt(s5PSlider.value) / 1000;
       const q = 1 - p;
       const bet = parseInt(s5BetSizeSlider.value);
       const n = Math.round(S5_BANKROLL / bet);
-      const m = Math.round(S5_TARGET / bet);
+      const m = Math.round(target / bet);
 
-      if (Math.abs(p - 0.5) < 0.0001) {
-        return 1 - n / m;
-      }
+      if (Math.abs(p - 0.5) < 0.0001) return 1 - n / m;
       const ratio = q / p;
       return (1 - Math.pow(ratio, n)) / (1 - Math.pow(ratio, m));
     }
 
-    function renderTrajectoryChart(trajectories: number[][]): void {
+    const OUTCOME_COLORS: Record<string, string> = {
+      ruin: '#a8252c',
+      target: '#3d6b4e',
+      unresolved: '#666666',
+    };
+    const OUTCOME_OPACITY: Record<string, number> = {
+      ruin: 0.4,
+      target: 0.4,
+      unresolved: 0.3,
+    };
+
+    function renderTrajectoryChart(result: RuinResult): void {
+      const target = S5_BANKROLL * s5TargetMult;
       const width = s5TrajectoryEl.clientWidth || 600;
 
       // Pick 25 random sample paths
-      const indices: number[] = [];
-      const pool = [...Array(trajectories.length).keys()];
-      for (let i = 0; i < Math.min(S5_SAMPLE_COUNT, pool.length); i++) {
-        const j = i + Math.floor(Math.random() * (pool.length - i));
+      const pool = [...Array(result.paths.length).keys()];
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
         [pool[i], pool[j]] = [pool[j], pool[i]];
-        indices.push(pool[i]);
       }
+      const indices = pool.slice(0, S5_SAMPLE_COUNT);
 
-      // Build line data
-      const lineData: { round: number; bankroll: number; path: number }[] = [];
+      // Build separate line data per outcome for colouring
+      const ruinLines: { round: number; bankroll: number; path: number }[] = [];
+      const targetLines: { round: number; bankroll: number; path: number }[] = [];
+      const unresolvedLines: { round: number; bankroll: number; path: number }[] = [];
+
+      let maxRound = 0;
       for (const idx of indices) {
-        const traj = trajectories[idx];
-        for (let r = 0; r < traj.length; r++) {
-          lineData.push({ round: r, bankroll: traj[r], path: idx });
+        const { trajectory, outcome } = result.paths[idx];
+        if (trajectory.length > maxRound) maxRound = trajectory.length;
+        const dest = outcome === 'ruin' ? ruinLines : outcome === 'target' ? targetLines : unresolvedLines;
+        for (let r = 0; r < trajectory.length; r++) {
+          dest.push({ round: r, bankroll: trajectory[r], path: idx });
         }
       }
 
-      // Find max round for domain
-      let maxRound = 0;
-      for (const idx of indices) {
-        if (trajectories[idx].length > maxRound) maxRound = trajectories[idx].length;
+      const marks: any[] = [
+        Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
+        Plot.ruleY([target], { stroke: "#1a1a1a", strokeDasharray: "6,4", strokeOpacity: 0.4 }),
+        Plot.text([{ x: maxRound * 0.95, y: target }], {
+          x: "x", y: "y", text: ["Target"], dy: -10, fontSize: 11, fill: "#1a1a1a", textAnchor: "end",
+        }),
+        Plot.text([{ x: 0, y: 0 }], {
+          x: "x", y: "y", text: ["Ruin"], dx: 25, dy: -8, fontSize: 11, fill: "#a8252c",
+        }),
+      ];
+
+      if (ruinLines.length > 0) {
+        marks.push(Plot.line(ruinLines, { x: "round", y: "bankroll", z: "path", stroke: OUTCOME_COLORS.ruin, strokeOpacity: OUTCOME_OPACITY.ruin, strokeWidth: 1.2 }));
+      }
+      if (unresolvedLines.length > 0) {
+        marks.push(Plot.line(unresolvedLines, { x: "round", y: "bankroll", z: "path", stroke: OUTCOME_COLORS.unresolved, strokeOpacity: OUTCOME_OPACITY.unresolved, strokeWidth: 1.2 }));
+      }
+      if (targetLines.length > 0) {
+        marks.push(Plot.line(targetLines, { x: "round", y: "bankroll", z: "path", stroke: OUTCOME_COLORS.target, strokeOpacity: OUTCOME_OPACITY.target, strokeWidth: 1.2 }));
       }
 
       const chart = Plot.plot({
         width,
         height: 280,
-        style: {
-          fontFamily: '"EB Garamond", Georgia, serif',
-          fontSize: '13px',
-          background: 'transparent',
-        },
+        style: { fontFamily: '"EB Garamond", Georgia, serif', fontSize: '13px', background: 'transparent' },
         x: { label: "Round", domain: [0, maxRound] },
-        y: { label: "↑ Bankroll (£)", domain: [0, S5_TARGET * 1.1] },
-        marks: [
-          Plot.gridY({ stroke: "#1a1a1a", strokeOpacity: 0.06 }),
-          // Target line
-          Plot.ruleY([S5_TARGET], { stroke: "#1a1a1a", strokeDasharray: "6,4", strokeOpacity: 0.4 }),
-          Plot.text([{ x: maxRound * 0.95, y: S5_TARGET }], {
-            x: "x", y: "y", text: ["Target"], dy: -10, fontSize: 11, fill: "#1a1a1a", textAnchor: "end",
-          }),
-          // Ruin label at y=0
-          Plot.text([{ x: 0, y: 0 }], {
-            x: "x", y: "y", text: ["Ruin"], dx: 25, dy: -8, fontSize: 11, fill: "#a8252c",
-          }),
-          // Sample paths
-          Plot.line(lineData, {
-            x: "round", y: "bankroll", z: "path",
-            stroke: "#a8252c", strokeOpacity: 0.4, strokeWidth: 1.2,
-            curve: "linear",
-          }),
-        ],
+        y: { label: "↑ Bankroll (£)", domain: [0, target * 1.1] },
+        marks,
       });
 
       s5TrajectoryEl.innerHTML = '';
@@ -2032,8 +2067,6 @@ import '../styles/global.css';
       const pctTarget = hitTarget / total * 100;
 
       s5BarEl.style.display = '';
-      s5BarLegend.style.display = '';
-      s5BarCaption.style.display = '';
 
       const bar = document.createElement('div');
       bar.style.cssText = 'display: flex; height: 36px; border-radius: 4px; overflow: hidden; font-family: "JetBrains Mono", monospace; font-size: 0.7rem; font-weight: 600;';
@@ -2046,19 +2079,39 @@ import '../styles/global.css';
       }
       if (pctUnresolved > 0) {
         const seg = document.createElement('div');
-        seg.style.cssText = `width: ${pctUnresolved}%; background: rgba(26,26,26,0.2); color: #1a1a1a; display: flex; align-items: center; justify-content: center;`;
+        seg.style.cssText = `width: ${pctUnresolved}%; background: #666; color: #fafaf7; display: flex; align-items: center; justify-content: center;`;
         if (pctUnresolved > 8) seg.textContent = pctUnresolved.toFixed(1) + '%';
         bar.appendChild(seg);
       }
       if (pctTarget > 0) {
         const seg = document.createElement('div');
-        seg.style.cssText = `width: ${pctTarget}%; background: #1a1a1a; color: #fafaf7; display: flex; align-items: center; justify-content: center;`;
+        seg.style.cssText = `width: ${pctTarget}%; background: #3d6b4e; color: #fafaf7; display: flex; align-items: center; justify-content: center;`;
         if (pctTarget > 8) seg.textContent = pctTarget.toFixed(1) + '%';
         bar.appendChild(seg);
       }
 
       s5BarEl.innerHTML = '';
       s5BarEl.appendChild(bar);
+
+      // Theory vs simulation
+      const aRuin = analyticRuinProb();
+      const aRuinPct = aRuin * 100;
+      const simRuinPct = pctRuin;
+      const diff = Math.abs(aRuinPct - simRuinPct);
+      let theoryText = `Theory predicts ruin in ${aRuinPct.toFixed(1)}% of cases. `;
+      if (diff <= 2) {
+        theoryText += 'The simulation agrees.';
+      } else {
+        theoryText += `The simulation disagrees by ${diff.toFixed(1)}%.`;
+      }
+      s5TheoryLine.textContent = theoryText;
+      s5TheoryLine.style.display = '';
+
+      // Asymmetry callout
+      const target = S5_BANKROLL * s5TargetMult;
+      const profit = target - S5_BANKROLL;
+      s5AsymmetryText.textContent = `If you hit your target, you make £${profit.toLocaleString('en-GB')}. If you go broke, you lose £1,000.`;
+      s5Asymmetry.style.display = '';
     }
 
     async function doS5Run(): Promise<void> {
@@ -2068,27 +2121,9 @@ import '../styles/global.css';
       await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
       const result = runRuinSim();
-      const total = result.hitTarget + result.hitRuin + result.unresolved;
 
-      renderTrajectoryChart(result.trajectories);
+      renderTrajectoryChart(result);
       renderSummaryBar(result.hitTarget, result.hitRuin, result.unresolved);
-
-      // Show stats
-      if (s5StatsPanel.style.display === 'none') {
-        s5StatsPanel.style.display = '';
-        if (!s5ReducedMotion) {
-          s5StatsPanel.style.opacity = '0';
-          s5StatsPanel.style.transition = 'opacity 200ms ease';
-          requestAnimationFrame(() => { s5StatsPanel.style.opacity = '1'; });
-        }
-      }
-
-      s5StatTarget.textContent = (result.hitTarget / total * 100).toFixed(1) + '%';
-      s5StatRuin.textContent = (result.hitRuin / total * 100).toFixed(1) + '%';
-      s5StatRuin.style.color = '#a8252c';
-
-      const aRuin = analyticRuinProb();
-      s5StatAnalytic.textContent = (aRuin * 100).toFixed(1) + '%';
 
       setTimeout(() => {
         s5RunBtn.textContent = 'Run simulation';
@@ -2098,10 +2133,11 @@ import '../styles/global.css';
 
     s5RunBtn.addEventListener('click', doS5Run);
 
-    // Scroll link to Section 6
     document.getElementById('scroll-to-s6')?.addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('beyond')?.scrollIntoView({ behavior: 'smooth' });
     });
+
+    updateS5Orient();
   </script>
 </Base>
