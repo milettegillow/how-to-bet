@@ -677,6 +677,8 @@ import '../styles/global.css';
   </main>
 
   <script>
+    import { track as s1Track } from '../lib/analytics';
+
     const slider = document.getElementById('bet-slider') as HTMLInputElement;
     const readout = document.getElementById('bet-readout')!;
     const lockBtn = document.getElementById('lock-bet') as HTMLButtonElement;
@@ -867,6 +869,7 @@ import '../styles/global.css';
       }
 
       responseText.innerHTML = msg;
+      s1Track('s1_bet_locked');
 
       // Show response
       requestAnimationFrame(() => {
@@ -883,6 +886,7 @@ import '../styles/global.css';
 
   <script>
     // ─── Section 2: Edge calculator ───
+    import { track as s2Track } from '../lib/analytics';
 
     const LOG_B_MIN = Math.log10(0.1);         // -1
     const LOG_B_MAX = Math.log10(2_000_000);    // ≈6.301
@@ -1082,6 +1086,7 @@ import '../styles/global.css';
       btn.addEventListener('click', () => {
         const preset = presets[presetKey];
         animatePreset(preset.p, preset.b, btn);
+        s2Track('s2_preset_clicked');
 
         // Scroll calculator into view if off-screen
         const calc = document.getElementById('edge-calculator');
@@ -1576,7 +1581,7 @@ import '../styles/global.css';
       await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
       const config = getSimConfig();
-      track('ran_simulation');
+      track('s3_simulation_run');
       const result = runSimulation(config);
 
       renderWealthChart(result, config);
@@ -1690,6 +1695,9 @@ import '../styles/global.css';
     // ─── Section 4: Full Kelly vs Half Kelly ───
     import * as Plot from "@observablehq/plot";
     import { formatCurrency } from "../lib/format";
+    import { track as s4Track } from '../lib/analytics';
+
+    let s4SliderEngaged = false;
 
     const s4ErrorSlider = document.getElementById('s4-error-slider') as HTMLInputElement;
     const s4ErrorReadout = document.getElementById('s4-error-readout')!;
@@ -1847,6 +1855,10 @@ import '../styles/global.css';
     }
 
     s4ErrorSlider.addEventListener('input', () => {
+      if (!s4SliderEngaged) {
+        s4SliderEngaged = true;
+        s4Track('s4_slider_engaged');
+      }
       renderS4Chart();
     });
 
@@ -2157,7 +2169,7 @@ import '../styles/global.css';
 
       await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
-      s5Track('ran_simulation');
+      s5Track('s5_simulation_run');
       const result = runRuinSim();
 
       renderTrajectoryChart(result);

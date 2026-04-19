@@ -13,9 +13,16 @@ let data = {
   visitorsToday: 0,
   avgTimeMs: 0,
   sessionCountWithTime: 0,
-  simulationsRun: 0,
-  sessionsRan: 0,
   scrolledToBottom: 0,
+  // Section-specific
+  s1Sessions: 0,
+  s2Sessions: 0,
+  s3Total: 0,
+  s3Sessions: 0,
+  s4Sessions: 0,
+  s5Total: 0,
+  s5Sessions: 0,
+  anySimSessions: 0,
 };
 
 try {
@@ -28,41 +35,41 @@ try {
     const redis = new Redis({ url, token });
     const today = new Date().toISOString().slice(0, 10);
 
-    const [
-      visitors,
-      visitorsToday,
-      totalTimeMs,
-      sessionCountWithTime,
-      simulationsRun,
-      sessionsRan,
-      scrolledToBottom,
-    ] = await Promise.all([
+    const results = await Promise.all([
       redis.get<number>('alltime:visitors'),
       redis.get<number>(`daily:${today}:visitors`),
       redis.get<number>('alltime:total_time_ms'),
       redis.get<number>('alltime:session_count_with_time'),
-      redis.get<number>('alltime:simulations_run'),
-      redis.get<number>('alltime:sessions_that_ran'),
       redis.get<number>('alltime:scrolled_to_bottom'),
+      // Section-specific
+      redis.get<number>('alltime:s1_bet_locked:sessions'),
+      redis.get<number>('alltime:s2_preset_clicked:sessions'),
+      redis.get<number>('alltime:s3_simulation_run:total'),
+      redis.get<number>('alltime:s3_simulation_run:sessions'),
+      redis.get<number>('alltime:s4_slider_engaged:sessions'),
+      redis.get<number>('alltime:s5_simulation_run:total'),
+      redis.get<number>('alltime:s5_simulation_run:sessions'),
+      redis.get<number>('alltime:any_simulation:sessions'),
     ]);
 
-    // Coerce to numbers - Redis may return strings
-    const nVisitors = Number(visitors) || 0;
-    const nVisitorsToday = Number(visitorsToday) || 0;
-    const nTotalTimeMs = Number(totalTimeMs) || 0;
-    const nSessionCount = Number(sessionCountWithTime) || 0;
-    const nSimsRun = Number(simulationsRun) || 0;
-    const nSessionsRan = Number(sessionsRan) || 0;
-    const nScrolled = Number(scrolledToBottom) || 0;
+    const n = (v: number | null) => Number(v) || 0;
+    const nSessionCount = n(results[3]);
+    const nTotalTimeMs = n(results[2]);
 
     data = {
-      visitors: nVisitors,
-      visitorsToday: nVisitorsToday,
+      visitors: n(results[0]),
+      visitorsToday: n(results[1]),
       avgTimeMs: nSessionCount > 0 ? nTotalTimeMs / nSessionCount : 0,
       sessionCountWithTime: nSessionCount,
-      simulationsRun: nSimsRun,
-      sessionsRan: nSessionsRan,
-      scrolledToBottom: nScrolled,
+      scrolledToBottom: n(results[4]),
+      s1Sessions: n(results[5]),
+      s2Sessions: n(results[6]),
+      s3Total: n(results[7]),
+      s3Sessions: n(results[8]),
+      s4Sessions: n(results[9]),
+      s5Total: n(results[10]),
+      s5Sessions: n(results[11]),
+      anySimSessions: n(results[12]),
     };
   }
 } catch (err) {
@@ -80,9 +87,15 @@ function formatTime(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
 
-const avgRunsPerRunner = data.sessionsRan > 0
-  ? (data.simulationsRun / data.sessionsRan).toFixed(1)
+const fmt = (n: number) => n.toLocaleString('en-GB');
+
+const totalSimRuns = data.s3Total + data.s5Total;
+const avgRunsPerRunner = data.anySimSessions > 0
+  ? (totalSimRuns / data.anySimSessions).toFixed(1)
   : '0';
+
+const s3Avg = data.s3Sessions > 0 ? (data.s3Total / data.s3Sessions).toFixed(1) : '0';
+const s5Avg = data.s5Sessions > 0 ? (data.s5Total / data.s5Sessions).toFixed(1) : '0';
 
 const scrollPct = data.sessionCountWithTime > 0
   ? ((data.scrolledToBottom / data.sessionCountWithTime) * 100).toFixed(1)
@@ -109,31 +122,67 @@ const now = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
         </div>
       ) : (
         <div class="mt-12">
+          {/* Unique visitors */}
           <div class="readout-card mb-4" style="padding: 1.5rem;">
             <div class="readout-label">Unique visitors</div>
-            <div class="readout-value" style="font-size: 2rem;">{data.visitors.toLocaleString('en-GB')}</div>
-            <div class="readout-caption">{data.visitorsToday.toLocaleString('en-GB')} today</div>
+            <div class="readout-value" style="font-size: 2rem;">{fmt(data.visitors)}</div>
+            <div class="readout-caption">{fmt(data.visitorsToday)} today</div>
           </div>
 
+          {/* Average time on site */}
           <div class="readout-card mb-4" style="padding: 1.5rem;">
             <div class="readout-label">Average time on site</div>
             <div class="readout-value" style="font-size: 2rem;">{formatTime(data.avgTimeMs)}</div>
-            <div class="readout-caption">across {data.sessionCountWithTime.toLocaleString('en-GB')} completed sessions</div>
+            <div class="readout-caption">across {fmt(data.sessionCountWithTime)} completed sessions</div>
           </div>
 
-          <div class="readout-card mb-4" style="padding: 1.5rem;">
+          {/* Simulations run - headline */}
+          <div class="readout-card mb-2" style="padding: 1.5rem;">
             <div class="readout-label">Simulations run</div>
-            <div class="readout-value" style="font-size: 2rem;">{data.simulationsRun.toLocaleString('en-GB')}</div>
+            <div class="readout-value" style="font-size: 2rem;">{fmt(totalSimRuns)}</div>
             <div class="readout-caption">
-              {data.sessionsRan.toLocaleString('en-GB')} distinct people ran a simulation, averaging {avgRunsPerRunner} runs per person
+              {fmt(data.anySimSessions)} distinct people ran a simulation, averaging {avgRunsPerRunner} runs per person
             </div>
           </div>
 
+          {/* By section breakdown */}
+          <div class="mb-4 pl-4 border-l-2 border-ink/10" style="margin-left: 0.5rem;">
+            <div class="readout-label mb-3">By section</div>
+
+            <div class="mb-3">
+              <div class="text-sm font-medium">Section 1 - The opening question</div>
+              <div class="text-sm text-ink/50">{fmt(data.s1Sessions)} people locked in a bet</div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-sm font-medium">Section 2 - Edge calculator</div>
+              <div class="text-sm text-ink/50">{fmt(data.s2Sessions)} people clicked a preset scenario</div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-sm font-medium">Section 3 - Main simulator</div>
+              <div class="text-sm text-ink/50">{fmt(data.s3Total)} total runs across {fmt(data.s3Sessions)} distinct people</div>
+              <div class="text-sm text-ink/50">averaging {s3Avg} runs per person</div>
+            </div>
+
+            <div class="mb-3">
+              <div class="text-sm font-medium">Section 4 - Half Kelly explainer</div>
+              <div class="text-sm text-ink/50">{fmt(data.s4Sessions)} people engaged with the slider</div>
+            </div>
+
+            <div>
+              <div class="text-sm font-medium">Section 5 - Gambler's ruin</div>
+              <div class="text-sm text-ink/50">{fmt(data.s5Total)} total runs across {fmt(data.s5Sessions)} distinct people</div>
+              <div class="text-sm text-ink/50">averaging {s5Avg} runs per person</div>
+            </div>
+          </div>
+
+          {/* Scrolled to the bottom */}
           <div class="readout-card mb-4" style="padding: 1.5rem;">
             <div class="readout-label">Scrolled to the bottom</div>
             <div class="readout-value" style="font-size: 2rem;">{scrollPct}%</div>
             <div class="readout-caption">
-              {data.scrolledToBottom.toLocaleString('en-GB')} of {data.sessionCountWithTime.toLocaleString('en-GB')} visitors made it all the way to the end
+              {fmt(data.scrolledToBottom)} of {fmt(data.sessionCountWithTime)} visitors made it all the way to the end
             </div>
           </div>
 
@@ -142,7 +191,7 @@ const now = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
       )}
 
       <div class="mt-12 text-center">
-        <a href="/" class="text-gold text-sm" style="text-decoration: none;">← back to the article</a>
+        <a href="/" class="text-gold text-sm" style="text-decoration: none;">&larr; back to the article</a>
       </div>
     </div>
   </main>

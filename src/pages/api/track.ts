@@ -90,17 +90,40 @@ export const POST: APIRoute = async ({ request }) => {
         break;
       }
 
-      case 'ran_simulation': {
-        const ranKey = `session:${sessionId}:ran_simulation`;
-        const prevCount = Number(await redis.get(ranKey)) || 0;
-        if (prevCount === 0) {
-          await redis.incr(`daily:${date}:sessions_that_ran`);
-          await redis.incr('alltime:sessions_that_ran');
+      // ─── Per-session events (S1, S2, S4) ───
+      case 's1_bet_locked':
+      case 's2_preset_clicked':
+      case 's4_slider_engaged': {
+        const flagKey = `session:${sessionId}:${event}`;
+        const already = await redis.get(flagKey);
+        if (!already) {
+          await redis.set(flagKey, 1, { ex: 86400 });
+          await redis.incr(`alltime:${event}:sessions`);
         }
-        await redis.incr(ranKey);
-        await redis.expire(ranKey, 86400);
-        await redis.incr(`daily:${date}:simulations_run`);
-        await redis.incr('alltime:simulations_run');
+        break;
+      }
+
+      // ─── Simulation events (S3, S5): total + distinct sessions + any_simulation ───
+      case 's3_simulation_run':
+      case 's5_simulation_run': {
+        // Increment total runs
+        await redis.incr(`alltime:${event}:total`);
+
+        // Dedupe session counter for this section
+        const sectionFlagKey = `session:${sessionId}:${event}`;
+        const sectionSeen = await redis.get(sectionFlagKey);
+        if (!sectionSeen) {
+          await redis.set(sectionFlagKey, 1, { ex: 86400 });
+          await redis.incr(`alltime:${event}:sessions`);
+        }
+
+        // Dedupe cross-section "any simulation" counter
+        const anyFlagKey = `session:${sessionId}:any_simulation`;
+        const anySeen = await redis.get(anyFlagKey);
+        if (!anySeen) {
+          await redis.set(anyFlagKey, 1, { ex: 86400 });
+          await redis.incr('alltime:any_simulation:sessions');
+        }
         break;
       }
 
