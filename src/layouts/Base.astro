@@ -33,5 +33,16 @@ const { title } = Astro.props;
   </head>
   <body class="bg-paper text-ink min-h-screen">
     <slot />
+
+    <!-- Analytics: minimal DIY tracking, no cookies, no third-party services -->
+    <script>
+      import { endSession, initScrollTracking } from '../lib/analytics';
+
+      // Track scroll-to-bottom via sentinel element
+      initScrollTracking();
+
+      // Send session duration on tab close
+      window.addEventListener('pagehide', endSession);
+    </script>
   </body>
 </html>

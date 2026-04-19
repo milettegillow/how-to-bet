@@ -666,6 +666,9 @@ import '../styles/global.css';
       </div>
     </section>
 
+    {/* Scroll-to-bottom sentinel for analytics */}
+    <div id="bottom-of-page" aria-hidden="true"></div>
+
     {/* ─── Footer ─── */}
     <footer class="max-w-prose mx-auto py-12 border-t border-ink/10 text-center text-sm text-ink/40">
       <p class="italic mb-2">Built by Milette Gillow. Week 15 of my 2026 weekly coding project. <a href="https://milettegillow.com" target="_blank" rel="noopener noreferrer" class="text-gold">milettegillow.com →</a></p>
@@ -1146,6 +1149,7 @@ import '../styles/global.css';
     import { runSimulation, kellyFraction, growthRate } from "../lib/kelly";
     import type { SimConfig, SimResult } from "../lib/kelly";
     import { formatCurrency } from "../lib/format";
+    import { track } from '../lib/analytics';
 
     // Log-scale helper for payout slider
     function sliderToSimB(v: number): number {
@@ -1572,6 +1576,7 @@ import '../styles/global.css';
       await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
       const config = getSimConfig();
+      track('ran_simulation');
       const result = runSimulation(config);
 
       renderWealthChart(result, config);
@@ -1862,6 +1867,7 @@ import '../styles/global.css';
   <script>
     // ─── Section 5: Gambler's Ruin ───
     import * as Plot from "@observablehq/plot";
+    import { track as s5Track } from '../lib/analytics';
 
     // ─── Part 1: Mirror question ───
 
@@ -2151,6 +2157,7 @@ import '../styles/global.css';
 
       await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
 
+      s5Track('ran_simulation');
       const result = runRuinSim();
 
       renderTrajectoryChart(result);

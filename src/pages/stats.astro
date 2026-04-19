@@ -1,0 +1,140 @@
+---
+export const prerender = false;
+
+import Base from '../layouts/Base.astro';
+import '../styles/global.css';
+import { Redis } from '@upstash/redis';
+
+// ─── Read KV data ───
+
+let kvConfigured = true;
+let data = {
+  visitors: 0,
+  visitorsToday: 0,
+  avgTimeMs: 0,
+  sessionCountWithTime: 0,
+  simulationsRun: 0,
+  sessionsRan: 0,
+  scrolledToBottom: 0,
+};
+
+try {
+  const url = import.meta.env.KV_REST_API_URL || import.meta.env.UPSTASH_REDIS_REST_URL;
+  const token = import.meta.env.KV_REST_API_TOKEN || import.meta.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    kvConfigured = false;
+  } else {
+    const redis = new Redis({ url, token });
+    const today = new Date().toISOString().slice(0, 10);
+
+    const [
+      visitors,
+      visitorsToday,
+      totalTimeMs,
+      sessionCountWithTime,
+      simulationsRun,
+      sessionsRan,
+      scrolledToBottom,
+    ] = await Promise.all([
+      redis.get<number>('alltime:visitors'),
+      redis.get<number>(`daily:${today}:visitors`),
+      redis.get<number>('alltime:total_time_ms'),
+      redis.get<number>('alltime:session_count_with_time'),
+      redis.get<number>('alltime:simulations_run'),
+      redis.get<number>('alltime:sessions_that_ran'),
+      redis.get<number>('alltime:scrolled_to_bottom'),
+    ]);
+
+    data = {
+      visitors: visitors || 0,
+      visitorsToday: visitorsToday || 0,
+      avgTimeMs: (sessionCountWithTime && totalTimeMs) ? totalTimeMs / sessionCountWithTime : 0,
+      sessionCountWithTime: sessionCountWithTime || 0,
+      simulationsRun: simulationsRun || 0,
+      sessionsRan: sessionsRan || 0,
+      scrolledToBottom: scrolledToBottom || 0,
+    };
+  }
+} catch (err) {
+  console.error('[stats] Redis error:', err);
+  kvConfigured = false;
+}
+
+// ─── Format helpers ───
+
+function formatTime(ms: number): string {
+  const totalSeconds = Math.round(ms / 1000);
+  if (totalSeconds < 60) return `${totalSeconds} seconds`;
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+const avgRunsPerRunner = data.sessionsRan > 0
+  ? (data.simulationsRun / data.sessionsRan).toFixed(1)
+  : '0';
+
+const scrollPct = data.sessionCountWithTime > 0
+  ? ((data.scrolledToBottom / data.sessionCountWithTime) * 100).toFixed(1)
+  : '0';
+
+const now = new Date().toISOString().replace('T', ' ').slice(0, 19) + ' UTC';
+---
+
+<Base title="Stats - How to bet (and win)">
+  <main class="px-4 sm:px-6">
+    <div class="max-w-prose mx-auto pt-20 pb-16 sm:pt-28 sm:pb-20">
+      <div class="flex items-start gap-4 mb-8">
+        <img src="/chip-1.png" alt="" width="48" height="48" class="section-chip-img hidden sm:block" />
+        <h1 class="text-ink">Stats</h1>
+      </div>
+      <p class="mt-3 text-ink/60 italic" style="font-size: 1.05rem;">
+        Live engagement data for betting.milettegillow.com. Updated in real time. No cookies, no third-party tracking.
+      </p>
+
+      {!kvConfigured ? (
+        <div class="mt-12 text-center py-12 border border-ink/10 rounded" style="background: #f8f7f4;">
+          <p class="text-ink/40 italic">No data yet - KV not configured.</p>
+          <p class="text-sm text-ink/30 mt-2">Provision a Redis store in the Vercel dashboard under Storage.</p>
+        </div>
+      ) : (
+        <div class="mt-12">
+          <div class="readout-card mb-4" style="padding: 1.5rem;">
+            <div class="readout-label">Unique visitors</div>
+            <div class="readout-value" style="font-size: 2rem;">{data.visitors.toLocaleString('en-GB')}</div>
+            <div class="readout-caption">{data.visitorsToday.toLocaleString('en-GB')} today</div>
+          </div>
+
+          <div class="readout-card mb-4" style="padding: 1.5rem;">
+            <div class="readout-label">Average time on site</div>
+            <div class="readout-value" style="font-size: 2rem;">{formatTime(data.avgTimeMs)}</div>
+            <div class="readout-caption">across {data.sessionCountWithTime.toLocaleString('en-GB')} completed sessions</div>
+          </div>
+
+          <div class="readout-card mb-4" style="padding: 1.5rem;">
+            <div class="readout-label">Simulations run</div>
+            <div class="readout-value" style="font-size: 2rem;">{data.simulationsRun.toLocaleString('en-GB')}</div>
+            <div class="readout-caption">
+              {data.sessionsRan.toLocaleString('en-GB')} distinct people ran a simulation, averaging {avgRunsPerRunner} runs per person
+            </div>
+          </div>
+
+          <div class="readout-card mb-4" style="padding: 1.5rem;">
+            <div class="readout-label">Scrolled to the bottom</div>
+            <div class="readout-value" style="font-size: 2rem;">{scrollPct}%</div>
+            <div class="readout-caption">
+              {data.scrolledToBottom.toLocaleString('en-GB')} of {data.sessionCountWithTime.toLocaleString('en-GB')} visitors made it all the way to the end
+            </div>
+          </div>
+
+          <p class="text-sm italic text-ink/30 mt-8 text-center">Data current as of {now}</p>
+        </div>
+      )}
+
+      <div class="mt-12 text-center">
+        <a href="/" class="text-gold text-sm" style="text-decoration: none;">← back to the article</a>
+      </div>
+    </div>
+  </main>
+</Base>
